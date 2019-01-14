@@ -5,182 +5,325 @@
  * Date: 11.11.2018
  * Time: 15:01
  */
+
+/**
+ * Includes
+ * Für Polymorphie
+ */
 include("Datenbank.php");
 
+/**
+ * Class Hilfsmethoden
+ * Eine Sammlung von Methoden, welche von den erbenden Klassen häufiger verwendet werden
+ */
 class Hilfsmethoden extends Datenbank
 {
+    /**
+     * @var
+     * Variable für Meldungen
+     */
     private $message;
 
-
-
+    /**
+     * Hilfsmethoden constructor.
+     * Erzeugt das Objekt der Klasse
+     */
     public function __construct()
     {
-
+        //Konstruktoraufruf der Parent-Klasse
         parent::__construct();
     }
 
+    /**
+     * @function createRollenDropdown
+     * Erzeugt ein Dropdown-Menü mit den Rollen aus der Datenbank
+     */
     public function createRollenDropdown()
     {
-
+        //SQL-Statement für das Laden der Rollen
         $statement = $this->dbh->prepare('SELECT * FROM rolle');
-
         $result = $statement->execute();
 
+        //fetched:
+        //[0]=Rollenname
+
+        //Select-Menü-Header
         $output = "<select name='Rolle' id='Rolle'>";
 
         while ($data = $statement->fetch()) {
             $output .= '<option value="' . $data[0] . '">' . $data[0] . '</option>';
 
         }
-
+        //Select-Menü-Ende
         $output .= "</select>";
 
         echo $output;
-
     }
 
+    /**
+     * @function createSonderaDropdown
+     * Erzeugt ein Dropdown-Menü mit den Sonderaufgaben aus der Datenbank
+     */
     public function createSonderaDropdown()
     {
+        //SQL-Statement für das Laden der Sonderaufgaben
         $statement = $this->dbh->prepare('SELECT `ID_SONDERAUFGABE`,`BEZEICHNUNG` FROM `sonderaufgabe`');
         $result = $statement->execute();
 
+        //fetched:
+        //[0]=SonderaufgabeID
+        //[1]=Name der Sonderaufgabe
+
+        //Select-Menü-Header
         $output = "<select name='Sonderaufgabe' id='Sonderaufgabe'>";
 
         while ($data = $statement->fetch()) {
             $output .= '<option value="' . $data[0] . '">' . $data[1] . '</option>';
         }
+        //Select-Menü-Ende
         $output .= "</select>";
+
         echo $output;
     }
 
+    /**
+     * @function createLvDropdown
+     * Erzeugt ein Dropdown-Menü mit den Lehrveranstaltungen aus der Datenbank
+     */
     public function createLvDropdown()
     {
+        //SQL-Statement für das Laden der Lehrveranstaltungen
         $statement = $this->dbh->prepare('SELECT `ID_VERANSTALTUNG`,`BEZEICHNUNG` FROM `veranstaltung`');
         $result = $statement->execute();
 
+        //fetched:
+        //[0]=LehrveranstaltungID
+        //[1]=Name der Lehrveranstaltung
+
+        //Select-Menü-Header
         $output = "<select name='Lv' id='Lv'>";
 
         while ($data = $statement->fetch()) {
             $output .= '<option value="' . $data[0] . '">' . $data[1] . '</option>';
         }
+        //Select-Menü-Ende
         $output .= "</select>";
+
         echo $output;
     }
 
+    /**
+     * @function createDozentDropdown
+     * Erzeugt ein Dropdown-Menü mit den Dozenten aus der Datenbank
+     */
     public function createDozentDropdown()
     {
-        $rolle = "Dozent";
-        $statement = $this->dbh->prepare('SELECT `ID_DOZENT`, `VORNAME`, `NAME` FROM `dozent` WHERE `ROLLE_BEZEICHNUNG` = :Rolle');
+        //Variable für Auswahlbeschränlung
+        $rolle = "Sekretariat";
+        $statement = $this->dbh->prepare('SELECT `ID_DOZENT`, `VORNAME`, `NAME` FROM `dozent` WHERE `ROLLE_BEZEICHNUNG` != :Rolle');
         $result = $statement->execute(array("Rolle" => $rolle));
 
+        //fetched:
+        //[0]=DozentID
+        //[1}=Vorname
+        //[2]=Nachname
+
+        //Select-Menü-Header
         $output = "<select name='Dozent' id='Dozent'>";
 
         while ($data = $statement->fetch()) {
             $output .= '<option value="' . $data[0] . '">' . $data[1] . ' ' . $data[2] . '</option>';
         }
+        //Select-Menü-Ende
         $output .= "</select>";
+
         echo $output;
     }
 
+    /**
+     * @function createArtVonZusatzaufgabeDropdown
+     * Erzeugt ein Dropdown-Menü mit den Arten von Zusatzaufgaben aus der Datenbank
+     */
     public function createArtVonZusatzaufgabeDropdown()
     {
-        $statement = $this->dbh->prepare("SELECT * FROM `arten_von_zusatzaufgaben`");
+        //SQL-Statement zum Laden der Arten der Zusatzaufgaben
+        $statement = $this->dbh->prepare("SELECT `ID_ART`,`BEZEICHNUNG` FROM `arten_von_zusatzaufgaben`");
         $result = $statement->execute();
 
+        //fetched:
+        //[0]=ArtID
+        //[1]=Bezeichnung der Zusatzaufgabe
+
+        //Select-Menü-Header
         $output = "<select name='Art' id='Art'>";
 
         while ($data = $statement->fetch()) {
             $output .= '<option value="' . $data[0] . '">' . $data[1] . '</option>';
         }
+        //Select-Menü-Ende
         $output .= "</select>";
-        echo $output;
 
+        echo $output;
     }
 
-
+    /**
+     * @function getDozentID
+     * Liefert die DozentenID auf Basis von Nachname und Vorname zurück
+     * @param $nachname
+     * Nachname des Dozenten
+     * @param $vorname
+     * Vorname des Dozenten
+     * @return mixed
+     * DozentID
+     */
     public function getDozentID($nachname, $vorname)
     {
+        //SQL-Statement zum Laden der DozentenID
         $statement = $this->dbh->prepare('SELECT `ID_DOZENT` FROM `dozent` WHERE `NAME` = :nachname AND `VORNAME` = :vorname');
         $result = $statement->execute(array('nachname' => $nachname, 'vorname' => $vorname));
+
+        //fetched:
+        //[0]= DozentID
+
         $data = $statement->fetch();
         return $data[0];
     }
 
+    /**
+     * @function getBenutzer
+     * Liefert alle Eigenschaften eines Benutzers auf Basis seines Benutzernamens zurück
+     * @param $benutzername
+     * Benutzername für den die Eigenschaften geladen werden sollen
+     * @return mixed
+     * Array mit Eigenschaften des Benutzers
+     */
     public function getBenutzer($benutzername)
     {
-        $statement = $this->dbh->prepare('SELECT * FROM `benutzerkonto` WHERE `BENUTZERNAME` = :benutzername');
+        //SQL-Statement zum Laden der Eigenschaften eines Benutzers auf Basis seines Benutzernamens
+        $statement = $this->dbh->prepare('SELECT `BENUTZERNAME`,`DOZENT_ID_DOZENT` FROM `benutzerkonto` WHERE `BENUTZERNAME` = :benutzername');
         $result = $statement->execute(array('benutzername' => $benutzername));
+
+        //fetched:
+        //[0]=Benutzername
+        //[1]=DozentID
+
         $data = $statement->fetch();
         return $data;
     }
 
+    /**
+     * @function getlvBezeichnung
+     * Liefert die Bezeichnung der Lehrveranstaltung auf Basis der ID zurück
+     * @param $lvID
+     * ID der Lehrveranstaltung
+     * @return mixed
+     * Bezeichnung der Lehrveranstaltung
+     */
     public function getlvBezeichnung($lvID)
     {
+        //SQL-Statement zum Laden der Bezeichung der Lehrveranstaltung
         $statement = $this->dbh->prepare('SELECT `BEZEICHNUNG` FROM `veranstaltung` WHERE `ID_VERANSTALTUNG` = :LvID');
         $result = $statement->execute(array("LvID" => $lvID));
+
+        //fetched:
+        //[0]=Bezeichnung der Lehrveranstaltung
+
         $data = $statement->fetch();
         return $data[0];
     }
 
+    /**
+     * @function getDozent
+     * Liefert Name, Vorname und Titel eines Dozenten auf Basis der ID zurück
+     * @param $dozentID
+     * ID des Dozenten
+     * @return mixed
+     * Array mit Name, Vorname und Titel
+     */
     public function getDozent($dozentID)
     {
+        //SQL-Statement zum Laden der Eigenschaften des Dozenten
         $statement = $this->dbh->prepare('SELECT `NAME`, `VORNAME`, `TITEL`FROM `dozent` WHERE `ID_DOZENT` = :DozentID');
         $result = $statement->execute(array("DozentID" => $dozentID));
+
+        //fetched:
+        //[0]=Nachname des Dozenten
+        //[1]=Vorname des Dozenten
+        //[2]=Titel des Dozenten
+
         $data = $statement->fetch();
 
         return $data;
-
     }
 
-    public function getLv($lvID)
-    {
-        $statement = $this->dbh->prepare("SELECT `BEZEICHNUNG` FROM `veranstaltung` WHERE `ID_VERANSTALTUNG` = :lvID");
-        $result = $statement->execute(array("lvID" => $lvID));
-        $data = $statement->fetch();
-
-        return $data[0];
-    }
-
+    /**
+     * @function getSonderaBezeichnung
+     * Liefert die Bezeichnung der Sonderaufgabe zurück
+     * @param $sonderaID
+     * ID der Sonderaufgabe
+     * @return mixed
+     * Bezeichnung der Sonderaufgabe
+     */
     public function getSonderaBezeichnung($sonderaID)
     {
-        $statement = $this->dbh->prepare('SELECT `BEZEICHNUNG`,`ID_SONDERAUFGABE` FROM `sonderaufgabe` WHERE `ID_SONDERAUFGABE` = :SonderaufgabeID');
+        //SQL-Statement zum Laden der Bezeichnung der Sonderaufgabe
+        $statement = $this->dbh->prepare('SELECT `BEZEICHNUNG` FROM `sonderaufgabe` WHERE `ID_SONDERAUFGABE` = :SonderaufgabeID');
         $result = $statement->execute(array("SonderaufgabeID" => $sonderaID));
+
+        //fetched:
+        //[0]=Bezeichnung der Sonderaufgabe
+
         $data = $statement->fetch();
         return $data[0];
     }
 
+    /**
+     * @function formatDozent
+     * Erzeugt einen String mit den zusammengesetzten Eigenschaften eines Dozenten
+     * @param $data
+     * Array mit Nachname, Vorname, Titel
+     * @return string
+     * Formatierter Dozent
+     */
     public function formatDozent($data)
     {
+        //Variablen extrahieren
         $titel = $data[2];
         $vorname = $data[1];
         $name = $data[0];
 
         $dozent = $titel . " " . $vorname . " " . $name;
         return $dozent;
-
-
     }
 
-    public function getZusatzaufgabeArt($artID)
-    {
-        $statement = $this->dbh->prepare("SELECT * FROM `arten_von_zusatzaufgaben` WHERE `ID_ART` = :ArtID");
-        $result = $statement->execute(array("ArtID" => $artID));
-        $data = $statement->fetch();
-        return $data[1];
-    }
-
-
+    /**
+     * @function getPOST
+     * Liefert den Wert von einem Feld aus einem Formular über den Key zurück
+     * @param $POST
+     * Key der Feldes
+     * @return mixed
+     * Rückgabe des jeweiligen Wertes
+     */
     public function getPOST($POST)
     {
         return $_POST["$POST"];
     }
 
+    /**
+     * @function showMessage
+     * Liefert Meldungen über Javascript alert() zurück
+     */
     public function showMessage()
     {
-        //Meldung über javascript alert() ausgeben
         echo "<script type='text/javascript'>alert('$this->message');</script>";
     }
 
+    /**
+     * @function getCurrentDate
+     * Liefert den aktuellen Tag zurück
+     * @return false|string
+     * Aktueller Tag (Systemzeit)
+     */
     public function getCurrentDate()
     {
         $timestamp = time();
@@ -188,77 +331,205 @@ class Hilfsmethoden extends Datenbank
         return $date;
     }
 
+    /**
+     * @function getSWSZusatz
+     * Liefert die Summe der SWS der Zusatzaufgaben eines Dozenten zurück
+     * @param $dozentID
+     * ID des Dozenten
+     * @return int|string
+     * Summe der SWS
+     */
     public function getSWSZusatz($dozentID)
     {
+        //SQL-Statement für das Laden der Summe der SWS der Zusatzaufgaben
         $statement = $this->dbh->prepare('SELECT SUM(arten_von_zusatzaufgaben.SWS) FROM `dozent_hat_zusatzaufgabe_in_s` 
 INNER JOIN arten_von_zusatzaufgaben ON dozent_hat_zusatzaufgabe_in_s.ARTEN_VON_ZUSATZAUFGABEN_ID_ART=arten_von_zusatzaufgaben.ID_ART 
 WHERE `DOZENT_ID_DOZENT` = :DozentID');
-        $result=$statement->execute(array("DozentID"=>$dozentID));
-        $data=$statement->fetch();
-        $sws=number_format($data[0],1);
-        if ($sws>2){
-            $sws=2;
+        $result = $statement->execute(array("DozentID" => $dozentID));
+
+        //fetched:
+        //[0]=Summe der SWS
+
+        $data = $statement->fetch();
+        //Formatieren der Summe auf eine Nachkommastelle
+        $sws = number_format($data[0], 1);
+        //Falls die Summe 2 SWS überschreitet
+        if ($sws > 2) {
+            $sws = 2;
         }
         return $sws;
     }
 
-    public function getSWSSonder($dozentID){
-        $statement=$this->dbh->prepare('SELECT SUM(`WIRKLICHE_SWS`) FROM `dozent_hat_sonderaufgabe_in_s` WHERE `DOZENT_ID_DOZENT` = :DozentID');
-        $result=$statement->execute(array("DozentID"=>$dozentID));
-        $data=$statement->fetch();
-        $sws=number_format($data[0],1);
+    /**
+     * @function getSWSSonder
+     * Liefert die Summe der SWS der Zusatzaufgaben eines Dozenten zurück
+     * @param $dozentID
+     * ID des Dozenten
+     * @return string
+     * Summe der SWS
+     */
+    public function getSWSSonder($dozentID)
+    {
+        //SQL-Statement für das Laden der Summe der SWS der Sonderaufgaben
+        $statement = $this->dbh->prepare('SELECT SUM(`WIRKLICHE_SWS`) FROM `dozent_hat_sonderaufgabe_in_s` WHERE `DOZENT_ID_DOZENT` = :DozentID');
+        $result = $statement->execute(array("DozentID" => $dozentID));
+
+        //fetched:
+        //[0]=Summe der SWS
+
+        $data = $statement->fetch();
+        //Formatieren der Summe auf eine Nachkommastelle
+        $sws = number_format($data[0], 1);
+
         return $sws;
     }
 
-    public function getSWSLv($dozentID){
-        $statement=$this->dbh->prepare('SELECT SUM(`WIRKLICHE_SWS`) FROM `dozent_hat_veranstaltung_in_s` WHERE `DOZENT_ID_DOZENT` = :DozentID');
-        $result=$statement->execute(array("DozentID"=>$dozentID));
-        $data=$statement->fetch();
-        $sws=number_format($data[0],1);
+    /**
+     * @function getSWSLv
+     * Liefert die Summe der SWS der Lehrveranstaltungen eines Dozenten zurück
+     * @param $dozentID
+     * ID des Dozenten
+     * @return string
+     * Summe der SWS
+     */
+    public function getSWSLv($dozentID)
+    {
+        //SQL-Statement für das Laden der Summe der SWS der Lehrveranstaltungen
+        $statement = $this->dbh->prepare('SELECT SUM(`WIRKLICHE_SWS`) FROM `dozent_hat_veranstaltung_in_s` WHERE `DOZENT_ID_DOZENT` = :DozentID');
+        $result = $statement->execute(array("DozentID" => $dozentID));
+
+        //fetched:
+        //[0]=Summe der SWS
+
+        $data = $statement->fetch();
+        //Formatieren der Summe auf eine Nachkommastelle
+        $sws = number_format($data[0], 1);
+
         return $sws;
     }
 
-    public function getCurrentSemester(){
-        $statement=$this->dbh->prepare("SELECT MAX(ID_SEMESTER) FROM `semester`");
-        $result=$statement->execute();
-        $data=$statement->fetch();
+    /**
+     * @function getCurrentSemester
+     * Liefert das aktuelle Semester auf Basis der höchsten ID zurück
+     * @return mixed
+     * ID des Semesters
+     */
+    public function getCurrentSemester()
+    {
+        //SQL-Statement zum Laden der höchsten SemesterID
+        $statement = $this->dbh->prepare("SELECT MAX(ID_SEMESTER) FROM `semester`");
+        $result = $statement->execute();
+
+        //fetched:
+        //[0}=SemesterID
+
+        $data = $statement->fetch();
         return $data[0];
     }
 
-    public function formatSemester($semesterID){
-        $statement=$this->dbh->prepare("SELECT `BEZEICHNUNG` FROM `semester` WHERE `ID_SEMESTER` = :SemesterID");
-        $result=$statement->execute(array("SemesterID"=>$semesterID));
-        $data=$statement->fetch();
+    /**
+     * @function formatSemester
+     * Liefert die Bezeichnung des Semesters auf Basis der ID zurück
+     * @param $semesterID
+     * ID des Semesters
+     * @return mixed
+     * Bezeichnung des Semesters
+     */
+    public function formatSemester($semesterID)
+    {
+        //SQL-Statement für das Laden der Semesterbezeichnung
+        $statement = $this->dbh->prepare("SELECT `BEZEICHNUNG` FROM `semester` WHERE `ID_SEMESTER` = :SemesterID");
+        $result = $statement->execute(array("SemesterID" => $semesterID));
+
+        //fetched:
+        //[0]=Bezeichnung des Semesters
+
+        $data = $statement->fetch();
         return $data[0];
 
     }
 
-    public function getCurrentUeberstunden($dozentID){
-        $statement=$this->dbh->prepare("SELECT `UEBERSTUNDEN` FROM `dozent` WHERE `ID_DOZENT` = :DozentID");
-        $result=$statement->execute(array("DozentID"=>$dozentID));
-        $data=$statement->fetch();
+    /**
+     * @function getCurrentUeberstunden
+     * Liefert die aktuellen Ueberstunden eines Dozenten zurück
+     * @param $dozentID
+     * ID des Dozenten
+     * @return mixed
+     * Aktuelle Ueberstunden
+     */
+    public function getCurrentUeberstunden($dozentID)
+    {
+        //SQL-Statement für das Laden der Ueberstunden
+        $statement = $this->dbh->prepare("SELECT `UEBERSTUNDEN` FROM `dozent` WHERE `ID_DOZENT` = :DozentID");
+        $result = $statement->execute(array("DozentID" => $dozentID));
+
+        //fetched:
+        //[0]=Ueberstunden
+
+        $data = $statement->fetch();
         return $data[0];
     }
 
-    public function getSWSArt($dozentID, $artID){;
-        $statement=$this->dbh->prepare("SELECT COUNT(`ID_ZUSATZAUFGABE`),arten_von_zusatzaufgaben.SWS FROM `dozent_hat_zusatzaufgabe_in_s` 
+    /**
+     * @function getSWSArt
+     * Liefert die Summe der SWS einer bestimmten Art von Zusatzaufgaben eines Dozenten zurück
+     * @param $dozentID
+     * ID des Dozenten
+     * @param $artID
+     * ID der Art der Zusatzaufgabe
+     * @return float|int
+     * Summe der SWS
+     */
+    public function getSWSArt($dozentID, $artID)
+    {
+        //SQL-Statement für das Laden der Anzahl der Zusatzaufgabe und der jeweiligen SWS
+        $statement = $this->dbh->prepare("SELECT COUNT(`ID_ZUSATZAUFGABE`),arten_von_zusatzaufgaben.SWS FROM `dozent_hat_zusatzaufgabe_in_s` 
 INNER JOIN arten_von_zusatzaufgaben ON dozent_hat_zusatzaufgabe_in_s.ARTEN_VON_ZUSATZAUFGABEN_ID_ART=arten_von_zusatzaufgaben.ID_ART 
 WHERE `ARTEN_VON_ZUSATZAUFGABEN_ID_ART` = :ArtPraxisprojektID AND `DOZENT_ID_DOZENT` = :DozentID");
-        $result=$statement->execute(array("ArtPraxisprojektID"=>$artID,"DozentID"=>$dozentID));
-        $data=$statement->fetch();
+        $result = $statement->execute(array("ArtPraxisprojektID" => $artID, "DozentID" => $dozentID));
 
-        $sws = $data[0]*$data[1];
+        //fetched:
+        //[0]=Anzahl der Zusatzaufgabe
+        //[1]=SWS der einzelnen Zusatzaufgabe
+
+        $data = $statement->fetch();
+
+        //Gesamte SWS berechnen
+        $sws = $data[0] * $data[1];
         return $sws;
     }
 
-    public function getSWSProSemester($dozentID){
-        $statement=$this->dbh->prepare("SELECT `SWS_PRO_SEMESTER` FROM `dozent` WHERE `ID_DOZENT` = :DozentID");
-        $result=$statement->execute(array("DozentID"=>$dozentID));
-        $data=$statement->fetch();
+    /**
+     * @function getSWSProSemester
+     * Liefert das Deputat eines Dozenten zurück
+     * @param $dozentID
+     * ID des Dozenten
+     * @return mixed
+     * Deputat in SWS
+     */
+    public function getSWSProSemester($dozentID)
+    {
+        //SQL-Statement zum Laden des Deputats
+        $statement = $this->dbh->prepare("SELECT `SWS_PRO_SEMESTER` FROM `dozent` WHERE `ID_DOZENT` = :DozentID");
+        $result = $statement->execute(array("DozentID" => $dozentID));
+
+        //fetched:
+        //[0]=SWS
+
+        $data = $statement->fetch();
         return $data[0];
     }
 
-    public function getSession($key){
+    /**
+     * @function getSession
+     * Liefert den Wert in der Session zu dem Key
+     * @param $key
+     * Key
+     * @return mixed
+     * Wert
+     */
+    public function getSession($key)
+    {
         return $_SESSION["$key"];
     }
 }

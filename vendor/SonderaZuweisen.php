@@ -5,55 +5,88 @@
  * Date: 13.11.2018
  * Time: 17:44
  */
-include ("Benutzersitzung.php");
 
+/**
+ * Includes
+ * Für Polymorphie
+ */
+include("Benutzersitzung.php");
+
+/**
+ * Class SonderaZuweisen
+ * Ermöglicht die Zuweisung von Sonderaufgaben
+ */
 class SonderaZuweisen extends Benutzersitzung
 {
-
+    /**
+     * @var
+     * Variablen zur Weiterverarbeitung
+     */
     private $message;
     private $semesterID;
 
+    /**
+     * SonderaZuweisen constructor.
+     * Erzeugt das Objekt der Klasse und ermöglicht Methodenaufruf nach Buttonclick
+     */
     public function __construct()
     {
+        //Kontruktoraufruf für Parent-Klassen
         parent::__construct();
-
+        //Zugriffsbeschränkung
         $this->preventOpen();
+        //Laden der Navbar
         $this->loadNav();
+
         $this->setSemesterID();
 
-        if (isset($_POST["submit"])){
-
+        //Nach Buttonclick
+        if (isset($_POST["submit"])) {
             $this->createLinkInDB();
             $this->showMessage();
-
         }
-
     }
 
-    private function setSemesterID(){
-        $this->semesterID=$this->getCurrentSemester();
+    /**
+     * @function setSemesterID
+     * Setzt die Variable $semesterID auf den aktuellen Wert aus der Datenbank
+     */
+    private function setSemesterID()
+    {
+        $this->semesterID = $this->getCurrentSemester();
     }
 
-    private function createLinkInDB(){
-        $sonderaID=$this->getPOST("Sonderaufgabe");
-        $dozentID=$this->getPOST("Dozent");
-        $sws=$this->getPOST("SWS");
+    /**
+     * @function createLinkInDB
+     * Erstellt die Verbindung Sonderaufgabe/Dozent in der Datenbank
+     */
+    private function createLinkInDB()
+    {
+        //Variablen aus dem Formular laden
+        $sonderaID = $this->getPOST("Sonderaufgabe");
+        $dozentID = $this->getPOST("Dozent");
+        $sws = $this->getPOST("SWS");
 
-
-        $statement=$this->dbh->prepare("INSERT INTO `dozent_hat_sonderaufgabe_in_s`(`DOZENT_ID_DOZENT`, `SONDERAUFGABE_ID_SONDERAUFGABE`, 
+        //SQL-Statement für die Erstellung der Verlinkung
+        $statement = $this->dbh->prepare("INSERT INTO `dozent_hat_sonderaufgabe_in_s`(`DOZENT_ID_DOZENT`, `SONDERAUFGABE_ID_SONDERAUFGABE`, 
 `SEMESTER_ID_SEMESTER`, `WIRKLICHE_SWS`) VALUES (:DozentID,:SonderaID,:SemesterID,:SWS)");
-        $result=$statement->execute(array("DozentID"=>$dozentID,"SonderaID"=>$sonderaID,"SemesterID"=>$this->semesterID,"SWS"=>$sws));
+        $result = $statement->execute(array("DozentID" => $dozentID, "SonderaID" => $sonderaID, "SemesterID" => $this->semesterID, "SWS" => $sws));
 
-        if ($result){
-            $this->message="Erstellt";
+        if ($result) {
+            //Erfolgreich erstellt
+            $this->message = "Erstellt";
         } else {
+            //Fehler beim Erstellen
             $this->message = "Fehler";
         }
     }
 
+    /**
+     * @function showMessage
+     * Liefert Meldungen über Javascript alert() zurück
+     */
     public function showMessage()
     {
-        //Meldung über javascript alert() ausgeben
         echo "<script type='text/javascript'>alert('$this->message');</script>";
     }
 }

@@ -6,44 +6,85 @@
  * Time: 17:43
  */
 
-include ("Benutzersitzung.php");
+/**
+ * Includes
+ * Für Polymorphie
+ */
+include("Benutzersitzung.php");
+
+/**
+ * Class MeineZusatza
+ * Ermöglicht das Anzeigen der Zusatzaufgaben eines Dozenten
+ */
 class MeineZusatza extends Benutzersitzung
 {
+    /**
+     * @var int
+     * Variable zur Weiterverarbeitung
+     */
+    private $dozentID = 0;
 
-    private $dozentID=0;
-
+    /**
+     * MeineZusatza constructor.
+     * Erzeugt das Objekt der Klasse
+     */
     public function __construct()
     {
+        //Konstruktoraufruf der Parent-Klassen
         parent::__construct();
-
+        //Zugriffsbeschränkung
         $this->preventOpen();
+        //Laden der Navbar
         $this->loadNav();
+        //Setzen der DozentenID
         $this->setDozentID();
     }
 
-
-    private function setDozentID(){
+    /**
+     * @function setDozentID
+     * Setzt die Variable $dozentID auf den Wert aus der Session
+     */
+    private function setDozentID()
+    {
         $this->dozentID = $this->getSession("IdDozent");
     }
 
-    public function showOwnZusatzaufgaben(){
-        $statement=$this->dbh->prepare("SELECT * FROM `dozent_hat_zusatzaufgabe_in_s` 
-INNER JOIN arten_von_zusatzaufgaben ON dozent_hat_zusatzaufgabe_in_s.ARTEN_VON_ZUSATZAUFGABEN_ID_ART = arten_von_zusatzaufgaben.ID_ART WHERE `DOZENT_ID_DOZENT` = :DozentID");
-        $result=$statement->execute(array("DozentID"=>$this->dozentID));
-
+    /**
+     * @function showOwnZusatzaufgaben
+     * Zeigt die aktuell betreuten Zusatzaufgaben eines Dozenten an
+     */
+    public function showOwnZusatzaufgaben()
+    {
+        //Tabellenheader
         $output = '<table align="center" style="width:50%" border="1">
-        <thead>
-        <tr>
-            <th>Art</th>
-            <th>Matrikelnummer</th>
-            <th>Name</th>
-            <th>SWS</th>
-        </tr>
-        </thead>
-        <tbody>';
+<thead>
+<tr>
+<th>Art</th>
+<th>Matrikelnummer</th>
+<th>Name</th>
+<th>SWS</th>
+</tr>
+</thead>
+<tbody>';
 
+        //SQL-Statement für das Laden der Zusatzaufgaben auf Basis der DozentenID
+        $statement = $this->dbh->prepare("SELECT * FROM `dozent_hat_zusatzaufgabe_in_s` 
+INNER JOIN arten_von_zusatzaufgaben ON dozent_hat_zusatzaufgabe_in_s.ARTEN_VON_ZUSATZAUFGABEN_ID_ART = arten_von_zusatzaufgaben.ID_ART WHERE `DOZENT_ID_DOZENT` = :DozentID");
+        $result = $statement->execute(array("DozentID" => $this->dozentID));
 
-        while ($data=$statement->fetch()){
+        //fetched:
+        //[0]=ZusatzaufgabeID
+        //[1]=DozentID
+        //[2]=Zusatzaufgabe Art ID
+        //[3]=Name des Studenten
+        //[4]=Matrikelnummer der Studenten
+        //[5]=SemesterID
+        //[6]=Zusatzaufgabe Art ID
+        //[7]=Bezeichnung Zusatzaufgabe
+        //[8]=Kuerzel Zusatzaufgabe
+        //[9]=SWS
+
+        while ($data = $statement->fetch()) {
             $output .= '<tr>';
             $output .= '<td>';
             $output .= $data[7];
@@ -58,15 +99,12 @@ INNER JOIN arten_von_zusatzaufgaben ON dozent_hat_zusatzaufgabe_in_s.ARTEN_VON_Z
             $output .= $data[9];
             $output .= '</td>';
             $output .= '</tr>';
-
         }
 
-        $output .= '
-</tbody>
+        //Tabellenende
+        $output .= '</tbody>
 </table>';
 
         echo $output;
     }
-
-
 }

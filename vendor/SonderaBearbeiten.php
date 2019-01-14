@@ -5,92 +5,147 @@
  * Date: 13.11.2018
  * Time: 14:48
  */
-include ("Benutzersitzung.php");
 
+/**
+ * Includes
+ * Für Polymorphie
+ */
+include("Benutzersitzung.php");
+
+/**
+ * Class SonderaBearbeiten
+ * Ermöglicht das Bearbeiten von Sonderaufgaben
+ */
 class SonderaBearbeiten extends Benutzersitzung
 {
+    /**
+     * @var
+     * Variablen zur Weiterverarbeitung
+     */
     private $message;
     private $sonderaID;
 
+    /**
+     * SonderaBearbeiten constructor.
+     * Erzeugt das Objekt der Klasse und ermöglicht den Methodenaufruf nach Buttonclick
+     */
     public function __construct()
     {
+        //Konstruktoraufruf für Parent-Klassen
         parent::__construct();
-
+        //Zugriffsbeschränkung
         $this->preventOpen();
+        //Laden der Navbar
         $this->loadNav();
 
-        if (isset ($_POST["submitSelect"])){
+        //Auswählen einer Sonderaufgabe
+        if (isset ($_POST["submitSelect"])) {
             $this->setSonderaID();
             $this->createEditSonderaufgaben();
         }
 
-        if (isset($_POST["submitLöschen"])){
+        //Löschen einer Sonderaufgabe
+        if (isset($_POST["submitLöschen"])) {
             $this->setSonderaID();
-            $this->deleteSonderaFormDB();
+            $this->deleteSonderaFromDB();
             $this->showMessage();
-
         }
 
-        if (isset($_POST["submitSpeichern"])){
+        //Aktualisieren einer Sonderaufgabe
+        if (isset($_POST["submitSpeichern"])) {
             $this->updateSonderaInDB();
             $this->showMessage();
-
         }
     }
 
-    private function setSonderaID(){
-        $this->sonderaID=$this->getPOST("Sonderaufgabe");
-        $this->message=$this->sonderaID;
+    /**
+     * @function setSonderaID
+     * Setzt die Variable $sonderaID auf den Wert aus dem Formular
+     */
+    private function setSonderaID()
+    {
+        $this->sonderaID = $this->getPOST("Sonderaufgabe");
     }
 
-    private function createEditSonderaufgaben(){
+    /**
+     * @function createEditSonderaufgaben
+     * Erzeugt ein Formular für die Bearbeitung der Sonderaufgabe
+     */
+    private function createEditSonderaufgaben()
+    {
+        //Formularheader
+        $output = "<form method='post'>";
 
-        $output="<form method='post'>";
+        //SQL-Statement für Eigenschaften der Sonderaufgabe auf Basis der ID
+        $statement = $this->dbh->prepare('SELECT `BEZEICHNUNG`,`SWS` FROM `sonderaufgabe` WHERE `ID_SONDERAUFGABE` =:SonderaufgabeID ');
+        $result = $statement->execute(array("SonderaufgabeID" => $this->sonderaID));
 
-        $statement=$this->dbh->prepare('SELECT `BEZEICHNUNG`,`SWS` FROM `sonderaufgabe` WHERE `ID_SONDERAUFGABE` =:SonderaufgabeID ');
-        $result=$statement->execute(array("SonderaufgabeID"=>$this->sonderaID));
-        $data=$statement->fetch();
+        //fetched:
+        //[0]=Name der Sonderaufgabe
+        //[1]=SWS
 
-        $output.="<input type='text' name='Bezeichnung' id='Bezeichnung' value='".$data[0]."'><br>";
-        $output.="<input type='text' name='SWS' id='SWS' value='".$data[1]."'><br>";
-        $output.="<input type='hidden' name='SonderaID' id='SonderaID' value='".$this->sonderaID."'><br>";
-        $output.="<input type='submit' name='submitSpeichern' id='submitSpeichern' value='Speichern'>";
+        $data = $statement->fetch();
 
-        $output.="</form>";
+        $output .= "<input type='text' name='Bezeichnung' id='Bezeichnung' value='" . $data[0] . "'><br>";
+        $output .= "<input type='text' name='SWS' id='SWS' value='" . $data[1] . "'><br>";
+        $output .= "<input type='hidden' name='SonderaID' id='SonderaID' value='" . $this->sonderaID . "'><br>";
+        $output .= "<input type='submit' name='submitSpeichern' id='submitSpeichern' value='Speichern'>";
+
+        //Formularende
+        $output .= "</form>";
 
         echo $output;
     }
 
-    private function deleteSonderaFormDB(){
+    /**
+     * @function deleteSonderaFromDB
+     * Löscht eine Sonderaufgabe auf Basis der ID aus der Datenbank
+     */
+    private function deleteSonderaFromDB()
+    {
+        //SQL-Statement zum Löschen einer Sonderaufgabe
         $statement = $this->dbh->prepare("DELETE FROM `sonderaufgabe` WHERE `ID_SONDERAUFGABE` = :SonderaufgabeID");
-        $result = $statement->execute(array("SonderaufgabeID"=>$this->sonderaID));
-        if ($result){
-            $this->message="Gelöscht";
+        $result = $statement->execute(array("SonderaufgabeID" => $this->sonderaID));
+
+        if ($result) {
+            //Erfolgreich Gelöscht
+            $this->message = "Gelöscht";
         } else {
-            $this->message="Fehler";
+            //Fehler beim Löschen
+            $this->message = "Fehler";
         }
     }
 
-    private function updateSonderaInDB(){
+    /**
+     * @function updateSonderaInDB
+     * Aktualisiert eine Sonderaufgabe auf Basis ihrer ID
+     */
+    private function updateSonderaInDB()
+    {
+        //Eingeschaften aus dem Formular holen
         $bezeichnung = $this->getPOST("Bezeichnung");
         $sws = $this->getPOST("SWS");
-        $sonderaID=$this->getPOST("SonderaID");
+        $sonderaID = $this->getPOST("SonderaID");
 
+        //SQL-Statement zur Aktualisierung einer Sonderaufgabe
         $statement = $this->dbh->prepare("UPDATE `sonderaufgabe` SET `BEZEICHNUNG`=:Bezeichnung,`SWS`=:SWS WHERE `ID_SONDERAUFGABE` =:SonderaufgabeID");
-        $result = $statement->execute(array("Bezeichnung"=>$bezeichnung,"SWS"=>$sws,"SonderaufgabeID"=>$sonderaID));
+        $result = $statement->execute(array("Bezeichnung" => $bezeichnung, "SWS" => $sws, "SonderaufgabeID" => $sonderaID));
 
-        if ($result){
-            $this->message="Update";
+        if ($result) {
+            //Aktualisiert
+            $this->message = "Update";
         } else {
-            $this->message="Fehler";
+            //Fehler beim Aktualisieren
+            $this->message = "Fehler";
         }
     }
 
+    /**
+     * @function showMessage
+     * Liefert Meldungen über Javascript alert() zurück
+     */
     public function showMessage()
     {
-        //Meldung über javascript alert() ausgeben
         echo "<script type='text/javascript'>alert('$this->message');</script>";
     }
-
-
 }

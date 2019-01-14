@@ -6,32 +6,49 @@
  * Time: 13:16
  */
 
+/**
+ * Class Datenbank
+ * Erzeugt die Datenbankverbindung
+ */
+class Datenbank
+{
+    //Instanz der Datenbankverbindung
+    protected $dbh;
 
-class Datenbank  {
-    protected $dbh; // Instanz der Datenbankverbindung
+    /**
+     * Datenbank constructor.
+     * Baut die Datenbankverbindung auf
+     */
+    public function __construct()
+    {
 
-    //Konstruktor: Datenbankverbindung aufbauen
-    public function __construct() {
-
-        // DB Anmeldeldedaten
+        //DB Anmeldeldedaten
         $host = "127.0.0.1";
         $port = "3306";
         $dbname = "curriculum_planung";
+
+        //Offline
         $user = ""; //local
         $pass = "";
-        //$user = "phoenix"; //server
+
+        //Server
+        //$user = "phoenix";
         //$pass = "bNs20OCt18";
 
         // Verbindung herstellen
         try {
             $this->dbh = new PDO("mysql:host=$host;port=$port;dbname=$dbname", $user, $pass);
-        } catch(PDOException $e) {
+        } catch (PDOException $e) {
             print "Fehler: " . $e->getMessage() . "<br>";
         }
     }
 
-    // Destruktor: Verbindung schließen
-    public function __destruct() {
+    /**
+     * Datenbank destructor.
+     * Schließt die aktuelle Datenbankverbindung
+     */
+    public function __destruct()
+    {
         $this->dbh = null;
     }
 }
