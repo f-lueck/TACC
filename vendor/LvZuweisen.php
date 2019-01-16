@@ -128,7 +128,7 @@ class lvZuweisen extends Benutzersitzung
 </tr>';
 
         //SQL-Statement zum Laden aller Veranstaltungen der Informatik
-        $statement = $this->dbh->prepare('SELECT `ID_VERANSTALTUNG`, `BEZEICHNUNG`, `SWS` FROM `veranstaltung` WHERE `ID_VERANSTALTUNG`>1000');
+        $statement = $this->dbh->prepare('SELECT `ID_VERANSTALTUNG`, `BEZEICHNUNG`, `SWS` FROM `veranstaltung` WHERE `ID_VERANSTALTUNG`>1000 AND `ID_VERANSTALTUNG`<2000');
         $result = $statement->execute();
 
         //fetched:
@@ -170,7 +170,7 @@ class lvZuweisen extends Benutzersitzung
 </tr>';
 
         //SQL-Statement zum Laden aller Veranstaltungen der Informatik
-        $statement = $this->dbh->prepare('SELECT `ID_VERANSTALTUNG`, `BEZEICHNUNG`, `SWS` FROM `veranstaltung` WHERE `ID_VERANSTALTUNG`<1000');
+        $statement = $this->dbh->prepare('SELECT `ID_VERANSTALTUNG`, `BEZEICHNUNG`, `SWS` FROM `veranstaltung` WHERE `ID_VERANSTALTUNG`>6000');
         $result = $statement->execute();
 
         //fetched:
