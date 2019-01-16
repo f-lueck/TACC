@@ -14,7 +14,7 @@ $obj = new StundenabrNachLvvo();
 <body>
 <div class="main">
     <div class="center">
-        <h1>Stundenabrechnung nach LVVO im SS 2018</h1><br>
+        <h1>Stundenabrechnung nach LVVO im <?php echo $obj->formatSemester($obj->getCurrentSemester())?></h1><br>
         <p>Fakultät: Informatik</p>
         <p>Ansprechpartnerin: Heidrun Rasch</p>
         <p>Standort: Wolfenbüttel</p>

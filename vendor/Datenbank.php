@@ -28,7 +28,7 @@ class Datenbank
         $dbname = "curriculum_planung";
 
         //Offline
-        $user = ""; //local
+        $user = "";
         $pass = "";
 
         //Server

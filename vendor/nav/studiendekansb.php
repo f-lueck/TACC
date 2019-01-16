@@ -29,6 +29,7 @@
                     <li><a href="sonderabearbeiten.php">Sonderaufgaben bearbeiten</a></li>
                     <li><a href="sonderazuweisen.php">Sonderaufgaben zuweisen</a></li>
                     <li><a href="dozentanlegen.php">Dozenten anlegen</a></li>
+                    <li><a href="dozentbearbeiten.php">Dozenten bearbeiten</a></li>
                 </ul>
             </li>
             <li><a href="abrerstellen.php">Abrechnung</a></li>

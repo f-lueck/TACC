@@ -73,8 +73,9 @@ class LvBearbeiten extends Benutzersitzung
      */
     private function createEditLv()
     {
+        $output = '<div class="main">';
         //Formularheader
-        $output = "<form method='post'>";
+        $output .= "<form method='post'>";
 
         //SQL-Statement um die Eigenschaften der LV zu laden
         $statement = $this->dbh->prepare('SELECT * FROM `veranstaltung` WHERE `ID_VERANSTALTUNG` =:LvID ');
@@ -91,19 +92,31 @@ class LvBearbeiten extends Benutzersitzung
         //[6]=Sommersemester Ja/Nein
         //[7]=Kosten pro Jahr
 
-        $output .= "<input type='text' name='Bezeichnung' id='Bezeichnung' value='" . $data[1] . "'><br>";
-        $output .= "<input type='text' name='SWS' id='SWS' value='" . $data[2] . "'><br>";
-        $output .= "<input type='text' name='Credits' id='Credits' value='" . $data[3] . "'><br>";
-        $output .= "<input type='text' name='Haeufigkeit' id='Haeufigkeit' value='" . $data[4] . "'><br>";
-        $output .= "<input type='text' name='Doppelung' id='Doppelung' value='" . $data[5] . "'><br>";
-        $output .= "<input type='text' name='Sommersemester' id='Sommersemester' value='" . $data[6] . "'><br>";
-        $output .= "<input type='text' name='Kosten' id='Kosten' value='" . $data[7] . "'><br>";
+        $output .= '<table>';
+
+        $output .= '<tr><td>Bezeichnung</td>';
+        $output .= "<td><input type='text' name='Bezeichnung' id='Bezeichnung' value='" . $data[1] . "'></td></tr>";
+        $output .= '<tr><td>SWS</td>';
+        $output .= "<td><input type='text' name='SWS' id='SWS' value='" . $data[2] . "'></td></tr>";
+        $output .= '<tr><td>Credits</td>';
+        $output .= "<td><input type='text' name='Credits' id='Credits' value='" . $data[3] . "'></td></tr>";
+        $output .= '<tr><td>Häufigkeit</td>';
+        $output .= "<td><input type='text' name='Haeufigkeit' id='Haeufigkeit' value='" . $data[4] . "'></td></tr>";
+        $output .= '<tr><td>Doppelung</td>';
+        $output .= "<td><input type='text' name='Doppelung' id='Doppelung' value='" . $data[5] . "'></td></tr>";
+        $output .= '<tr><td>Sommersemester (1/0)</td>';
+        $output .= "<td><input type='text' name='Sommersemester' id='Sommersemester' value='" . $data[6] . "'></td></tr>";
+        $output .= '<tr><td>Kosten</td>';
+        $output .= "<td><input type='text' name='Kosten' id='Kosten' value='" . $data[7] . "'></td></tr>";
 
         //ID der LV in hidden-field
         $output .= "<input type='hidden' name='LvID' id='LvID' value='" . $this->lvID . "'><br>";
-        $output .= "<input type='submit' name='submitSpeichern' id='submitSpeichern' value='Speichern'>";
+        $output .= '<tr><td colspan="2"><button class="submitButtons" type="submit" name="submitSpeichern" id="submitSpeichern" value="Speichern">Speichern
+                </button></td></tr>';
 
+        $output .= '</table>';
         $output .= "</form>";
+        $output .= '</div>';
 
         echo $output;
     }

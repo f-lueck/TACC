@@ -73,12 +73,15 @@ class SonderaBearbeiten extends Benutzersitzung
      */
     private function createEditSonderaufgaben()
     {
+        $output = '<div class="main">';
         //Formularheader
-        $output = "<form method='post'>";
+        $output .= "<form method='post'>";
 
         //SQL-Statement für Eigenschaften der Sonderaufgabe auf Basis der ID
         $statement = $this->dbh->prepare('SELECT `BEZEICHNUNG`,`SWS` FROM `sonderaufgabe` WHERE `ID_SONDERAUFGABE` =:SonderaufgabeID ');
         $result = $statement->execute(array("SonderaufgabeID" => $this->sonderaID));
+
+        $output .= '<table>';
 
         //fetched:
         //[0]=Name der Sonderaufgabe
@@ -86,13 +89,18 @@ class SonderaBearbeiten extends Benutzersitzung
 
         $data = $statement->fetch();
 
-        $output .= "<input type='text' name='Bezeichnung' id='Bezeichnung' value='" . $data[0] . "'><br>";
-        $output .= "<input type='text' name='SWS' id='SWS' value='" . $data[1] . "'><br>";
+        $output .= "<tr><td>Bezeichnung</td>";
+        $output .= "<td><input type='text' name='Bezeichnung' id='Bezeichnung' value='" . $data[0] . "'></td></tr>";
+        $output .= "<tr><td>SWS</td>";
+        $output .= "<td><input type='text' name='SWS' id='SWS' value='" . $data[1] . "'></td></tr>";
         $output .= "<input type='hidden' name='SonderaID' id='SonderaID' value='" . $this->sonderaID . "'><br>";
-        $output .= "<input type='submit' name='submitSpeichern' id='submitSpeichern' value='Speichern'>";
+        $output .= '<tr><td colspan="2"><button class="submitButtons" type="submit" name="submitSpeichern" id="submitSpeichern" value="Speichern">Speichern
+                </button></td></tr>';
 
+        $output .= '</table>';
         //Formularende
         $output .= "</form>";
+        $output .= '</div>';
 
         echo $output;
     }

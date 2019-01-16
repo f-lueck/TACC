@@ -102,27 +102,4 @@ $obj = new LvZuweisen();
     </div>
 </div>
 </body>
-<body>
-<div class="main">
-    <div class="center">
-        <h1>Lehrveranstaltung zuweisen</h1>
-        <form method="post">
-            Dozent auswählen:
-            <?php
-            $obj->createDozentDropdown();
-            ?>
-            Lehrveranstaltung auswählen:
-            <?php
-            $obj->createLvDropdown();
-            ?>
-            <br>
-            <input type="number" name="SWS" id="SWS" value="SWS">
-            <br>
-            <br>
-            <input type="submit" id="submit1" name="submit1" value="Bestätigen">
-        </form>
-    </div>
-</div>
-
-</body>
 </html>
