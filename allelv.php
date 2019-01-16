@@ -29,6 +29,11 @@ $obj = new AlleLv();
             <?php
             $obj->showLinkAllDozentLv();
             ?>
+            <div class="buttonholder">
+                <form method="post">
+                    <button class="submitButtons" type="submit" name="print" id="print">Herunterladen</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>

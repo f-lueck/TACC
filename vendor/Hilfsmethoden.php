@@ -532,4 +532,84 @@ WHERE `ARTEN_VON_ZUSATZAUFGABEN_ID_ART` = :ArtPraxisprojektID AND `DOZENT_ID_DOZ
     {
         return $_SESSION["$key"];
     }
+
+    /**
+     * @function getFE
+     * Liefert den Wert von F+E aus der Datenbank für den Dozenten zurück
+     * @param $dozentID
+     * ID des Dozenten
+     * @return mixed
+     * F+E in SWS
+     */
+    public function getFE($dozentID)
+    {
+        $statement = $this->dbh->prepare('SELECT `FE` FROM `dozent` WHERE `ID_DOZENT` = :DozentID');
+        $result = $statement->execute(array('DozentID' => $dozentID));
+
+        //fetched:
+        //[0]=SWS für F+E
+
+        $data = $statement->fetch();
+        return $data[0];
+    }
+
+    /**
+     * @function getSWSInAF
+     * Liefert den Wert von SWS in anderen Fakultäten aus der Datenbank für den Dozenten zurück
+     * @param $dozentID
+     * ID des Dozenten
+     * @return mixed
+     * SWS in anderen Fakultäten
+     */
+    public function getSWSInAF($dozentID)
+    {
+        $statement = $this->dbh->prepare('SELECT `SWS_I_A_F` FROM `dozent` WHERE `ID_DOZENT` = :DozentID');
+        $result = $statement->execute(array('DozentID' => $dozentID));
+
+        //fetched:
+        //[0]=SWS in anderen Fakultäten
+
+        $data = $statement->fetch();
+        return $data[0];
+    }
+
+    /**
+     * @function forceDownload
+     * Lädt eine Datei durch ihren Dateinamen herunter
+     * @param $filename
+     * Dateiname
+     */
+    function forceDownload($filename)
+    {
+        $filedata = @file_get_contents($filename);
+
+        //Datei existiert
+        if ($filedata) {
+            $basename = basename($filename);
+
+            //Meta-Daten und Mime-Type
+            header("Content-Type: application-x/force-download");
+            header("Content-Disposition: attachment; filename=$basename");
+            header("Content-length: " . (string)(strlen($filedata)));
+            header("Expires: " . gmdate("D, d M Y H:i:s", mktime(date("H") + 2, date("i"), date("s"), date("m"), date("d"), date("Y"))) . " GMT");
+            header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+
+            //Kompatibilität für IE
+            if (FALSE === strpos($_SERVER["HTTP_USER_AGENT"], 'MSIE ')) {
+                header("Cache-Control: no-cache, must-revalidate");
+            }
+
+            header("Pragma: no-cache");
+            flush();
+
+            //Laden der Datei in den Output-Puffer
+            ob_start();
+            echo $filedata;
+            //Löschen der Datei
+            unlink($filename);
+        } //Datei existiert nicht
+        else {
+            die("Datei $filename existiert nicht");
+        }
+    }
 }

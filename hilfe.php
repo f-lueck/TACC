@@ -1,3 +1,8 @@
+<?php
+include ("vendor/Hilfe.php");
+
+$obj = new Hilfe();
+?>
 <!DOCTYPE html>
 <html>
 <head>

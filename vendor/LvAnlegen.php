@@ -59,7 +59,7 @@ class lvAnlegen extends Benutzersitzung
         $kosten = $this->getPOST("Kosten");
 
         //SQL-Statement für die Erstellung einer neuen LV
-        $statement = $this->dbh->prepare('INSERT INTO `veranstaltung`(`BEZEICHNUNG`, `SWS`, `CREDITS`, `HAUEFIGKEIT_PA`,
+        $statement = $this->dbh->prepare('INSERT INTO `veranstaltung`(`BEZEICHNUNG`, `SWS`, `CREDITS`, `HAEUFIGKEIT_PA`,
  `FAKTOR_DOPPELUNG`, `SOMMERSEMESTER`, `KOSTEN_PA`) VALUES (:Bezeichnung,:SWS,:Credits,:Haeufigkeit,:Doppelt,:Sommer,:Kosten)');
         $result = $statement->execute(array('Bezeichnung' => $Bezeichnung, 'SWS' => $SWS, 'Credits' => $credits, 'Haeufigkeit' => $haeufigkeit, 'Doppelt' => $doppelt, 'Sommer' => $sommersemester, 'Kosten' => $kosten));
 

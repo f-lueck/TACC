@@ -27,11 +27,7 @@ class StundenabrNachLvvo extends Benutzersitzung
      * @var int
      * Variablen zur Weiterverarbeitung
      */
-    private $praxisprojektID = 1;
-    private $bachelorarbeitID = 2;
-    private $masterarbeitID = 3;
-    private $diplomarbeitID = 4;
-    private $tutoriumID = 5;
+    private $summeUeberstunden = 0;
 
     /**
      * StundenabrNachLvvo constructor.
@@ -73,6 +69,8 @@ class StundenabrNachLvvo extends Benutzersitzung
 
         //Füllen der xlsx
         $this->createStundenabrNachLvvoHeader($sheet);
+
+        $sheet->getStyle('A6:N7')->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
         $this->createStundenabrNachLvvoTableHeader($sheet);
 
         //Counter für Abstände innerhalb der Zellen
@@ -133,6 +131,9 @@ class StundenabrNachLvvo extends Benutzersitzung
         $sheet->setCellValue('I7', 'Sonstige');
         $sheet->setCellValue('J7', 'Definition');
 
+        $sheet->mergeCells('F6:J6');
+        $sheet->mergeCells('A7:E7');
+        $sheet->mergeCells('K7:N7');
     }
 
     /**
@@ -145,9 +146,11 @@ class StundenabrNachLvvo extends Benutzersitzung
      */
     private function createStundenabrNachLvvoTableContent(&$sheet, &$counter)
     {
+        $rolle = 'Sekretariat';
+
         //SQL-Statement zum Laden aller Dozenten aus der Datenbank
-        $statement = $this->dbh->prepare("SELECT `ID_DOZENT`,`TITEL`, `VORNAME`, `NAME`, `SWS_PRO_SEMESTER` FROM `dozent`");
-        $result = $statement->execute();
+        $statement = $this->dbh->prepare("SELECT `ID_DOZENT`,`TITEL`, `VORNAME`, `NAME`, `SWS_PRO_SEMESTER`, `FE` FROM `dozent` WHERE `ROLLE_BEZEICHNUNG` != :Rolle ORDER BY `NAME`");
+        $result = $statement->execute(array('Rolle' => $rolle));
 
         //fetched:
         //[0]=ID des Dozenten
@@ -155,65 +158,49 @@ class StundenabrNachLvvo extends Benutzersitzung
         //[2]=Vorname des Dozenten
         //[3]=Nachname des Dozenten
         //[4]=Deputat des Dozenten
+        //[5]=F+E
+
+        $anzDozenten = 1;
+
 
         while ($data = $statement->fetch()) {
-            $sheet->setCellValue('A' . $counter, $data[0]);
+            $sheet->setCellValue('A' . $counter, $anzDozenten);
             $sheet->setCellValue('B' . $counter, $data[1]);
             $sheet->setCellValue('C' . $counter, $data[3] . ', ' . $data[2]);
             $sheet->setCellValue('D' . $counter, $data[4]);
-            $sheet->setCellValue('E' . $counter, $this->calcSummeSWS($data[0]));
+            $sheet->setCellValue('E' . $counter, $this->summeSWS($data[0]));
+            $sheet->setCellValue('F' . $counter, $data[5]);
 
 
             $sheet->setCellValue('I' . $counter, $this->getSWSSonder($data[0]));
             $sheet->setCellValue('J' . $counter, $this->getAllSonderaBezFormat($data[0]));
+            $sheet->setCellValue('K' . $counter, $this->calcNettoLehre($data[0]));
 
             $sheet->setCellValue('L' . $counter, $this->calcDeltaSWS($data[0]));
             $sheet->setCellValue('M' . $counter, $this->getCurrentUeberstunden($data[0]));
-            $sheet->setCellValue('N' . $counter, $this->calcUeberstunden($data[0]));
+            $ueberstunden = $this->calcUeberstunden($data[0]);
+            $sheet->setCellValue('N' . $counter, $ueberstunden);
 
             //Nach Beendigung für einen Dozenten Counter erhöhen
             $counter++;
+            $anzDozenten++;
+            $this->summeUeberstunden += $ueberstunden;
         }
+        $sheet->getStyle('A8:N' . $counter)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
     }
 
     /**
-     * @function calcSummeSWS
-     * Berechnet die Summe der SWS aller Veranstaltungen eines Dozenten
-     * @param $dozentID
-     * ID des Dozenten
-     * @return float|int|string
-     * SWS
+     * @function summeSWS
+     * Liefert die Summe aller aktuellen Veranstaltungen
      */
-    private function calcSummeSWS($dozentID)
+    public function summeSWS($dozentID)
     {
-        $sws = 0;
-        $sws += $this->getSWSLv($dozentID);
-        $sws += $this->getSWSArt($dozentID, $this->praxisprojektID);
-        $sws += $this->calcAbschlussarbeitenSWS($dozentID);
-        $sws += $this->getSWSArt($dozentID, $this->tutoriumID);
-        //in anderen Fakultäten
-        //Verfügungsstunden
+        $sws = $this->getSWSZusatz($dozentID);
         $sws += $this->getSWSSonder($dozentID);
-
+        $sws += $this->getSWSLv($dozentID);
+        $sws += $this->getFE($dozentID);
+        $sws += $this->getSWSInAF($dozentID);
         return $sws;
-    }
-
-    /**
-     * @function calcAbschlussarbeitenSWS
-     * Berechnet die SWS aller Abschlussarbeiten eines Dozenten
-     * @param $dozentID
-     * ID des Dozenten
-     * @return float|int
-     * SWS
-     */
-    private function calcAbschlussarbeitenSWS($dozentID)
-    {
-
-        $bachelorsws = $this->getSWSArt($dozentID, $this->bachelorarbeitID);
-        $mastersws = $this->getSWSArt($dozentID, $this->masterarbeitID);
-        $diplomsws = $this->getSWSArt($dozentID, $this->diplomarbeitID);
-
-        return ($bachelorsws + $mastersws + $diplomsws);
     }
 
     /**
@@ -248,6 +235,22 @@ INNER JOIN sonderaufgabe ON dozent_hat_sonderaufgabe_in_s.SONDERAUFGABE_ID_SONDE
     }
 
     /**
+     * @function calcNettoLehre
+     * Berechnet die Netto SWS (Gesamt - Verfuegungsstunden)
+     * @param $dozentID
+     * ID des Dozenten
+     * @return int|mixed|string
+     * Netto SWS
+     */
+    private function calcNettoLehre($dozentID)
+    {
+        $sws = $this->getSWSZusatz($dozentID);
+        $sws += $this->getSWSLv($dozentID);
+        $sws += $this->getSWSInAF($dozentID);
+        return $sws;
+    }
+
+    /**
      * @function calcDeltaSWS
      * Berechnet die Differenz von Deputat und geleisteten SWS eines Dozenten
      * @param $dozentID
@@ -257,7 +260,7 @@ INNER JOIN sonderaufgabe ON dozent_hat_sonderaufgabe_in_s.SONDERAUFGABE_ID_SONDE
      */
     private function calcDeltaSWS($dozentID)
     {
-        $swsGeleistet = $this->calcSummeSWS($dozentID);
+        $swsGeleistet = $this->summeSWS($dozentID);
         $swsSoll = $this->getSWSProSemester($dozentID);
         $delta = $swsGeleistet - $swsSoll;
 
@@ -292,49 +295,12 @@ INNER JOIN sonderaufgabe ON dozent_hat_sonderaufgabe_in_s.SONDERAUFGABE_ID_SONDE
     private function createStundenabrNachLvvoBottom(&$sheet, &$counter)
     {
         $sheet->setCellValue('A' . $counter, 'Summen');
+        $sheet->mergeCells('A' . $counter . ':K' . $counter);
+        $sheet->setCellValue('L' . $counter, $this->summeUeberstunden);
+        $sheet->mergeCells('L' . $counter . ':N' . $counter);
         $counter += 2;
         $sheet->setCellValue('A' . $counter, 'Prof. Dr. U. Klages (Dekan)');
-        $sheet->setCellValue('G' . $counter, $this->getCurrentDate());
-    }
-
-    /**
-     * @function forceDownload
-     * Lädt eine Datei durch ihren Dateinamen herunter
-     * @param $filename
-     * Dateiname
-     */
-    function forceDownload($filename)
-    {
-        $filedata = @file_get_contents($filename);
-
-        //Datei existiert
-        if ($filedata) {
-            $basename = basename($filename);
-
-            //Meta-Daten und Mime-Type
-            header("Content-Type: application-x/force-download");
-            header("Content-Disposition: attachment; filename=$basename");
-            header("Content-length: " . (string)(strlen($filedata)));
-            header("Expires: " . gmdate("D, d M Y H:i:s", mktime(date("H") + 2, date("i"), date("s"), date("m"), date("d"), date("Y"))) . " GMT");
-            header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
-
-            //Kompatibilität für IE
-            if (FALSE === strpos($_SERVER["HTTP_USER_AGENT"], 'MSIE ')) {
-                header("Cache-Control: no-cache, must-revalidate");
-            }
-
-            header("Pragma: no-cache");
-            flush();
-
-            //Laden der Datei in den Output-Puffer
-            ob_start();
-            echo $filedata;
-            //Löschen der Datei
-            unlink($filename);
-        } //Datei existiert nicht
-        else {
-            die("Datei $filename existiert nicht");
-        }
+        $sheet->setCellValue('I' . $counter, 'Stand: ' . $this->getCurrentDate());
     }
 
     /**
@@ -379,20 +345,13 @@ INNER JOIN sonderaufgabe ON dozent_hat_sonderaufgabe_in_s.SONDERAUFGABE_ID_SONDE
 
 
         $html .= '<tr>';
-        $html .= '<th></th>';
-        $html .= '<th></th>';
-        $html .= '<th></th>';
-        $html .= '<th></th>';
-        $html .= '<th></th>';
+        $html .= '<th colspan="5"></th>';
         $html .= '<th>F+E</th>';
-        $html .= '<th>herausgeh.Bedeutung</th>';
+        $html .= '<th>herausgeh. Bedeutung</th>';
         $html .= '<th>besondere Aufgaben</th>';
         $html .= '<th>Sonstige</th>';
         $html .= '<th>Definition</th>';
-        $html .= '<th></th>';
-        $html .= '<th></th>';
-        $html .= '<th></th>';
-        $html .= '<th></th>';
+        $html .= '<th colspan="4"></th>';
         $html .= '</tr>';
     }
 
@@ -404,9 +363,12 @@ INNER JOIN sonderaufgabe ON dozent_hat_sonderaufgabe_in_s.SONDERAUFGABE_ID_SONDE
      */
     private function createTableContent(&$html)
     {
+        $rolle = 'Sekretariat';
+
         //SQL-Statement zum Laden aller Dozenten
-        $statement = $this->dbh->prepare("SELECT `ID_DOZENT`,`TITEL`, `VORNAME`, `NAME`, `SWS_PRO_SEMESTER` FROM `dozent`");
-        $result = $statement->execute();
+        $statement = $this->dbh->prepare("SELECT `ID_DOZENT`,`TITEL`, `VORNAME`, `NAME`, `SWS_PRO_SEMESTER`, `FE`, `SWS_I_A_F`  
+FROM `dozent` WHERE `ROLLE_BEZEICHNUNG` != :Rolle ORDER BY `NAME`");
+        $result = $statement->execute(array('Rolle' => $rolle));
 
         //fetched:
         //[0]=ID des Dozenten
@@ -414,36 +376,48 @@ INNER JOIN sonderaufgabe ON dozent_hat_sonderaufgabe_in_s.SONDERAUFGABE_ID_SONDE
         //[2]=Vorname des Dozenten
         //[3]=Nachname des Dozenten
         //[4]=Deputat des Dozenten
+        //[5]=SWS für F+E
+        //[6]=SWS in anderen Fakultäten
 
+        $counter = 1;
         while ($data = $statement->fetch()) {
             $html .= '<tr>';
-            $html .= '<td>' . $data[0] . '</td>';
+            $html .= '<td>' . $counter . '</td>';
             $html .= '<td>' . $data[1] . '</td>';
             $html .= '<td>' . $data[2] . ', ' . $data[3] . '</td>';
             $html .= '<td>' . $data[4] . '</td>';
-            $html .= '<td>' . $this->calcSummeSWS($data[0]) . '</td>';
-            $html .= '<td>???</td>';
-            $html .= '<td>???</td>';
-            $html .= '<td>???</td>';
+            $html .= '<td>' . $this->summeSWS($data[0]) . '</td>';
+            $html .= '<td>' . $data[5] . '</td>';
+            $html .= '<td></td>';
+            $html .= '<td></td>';
             $html .= '<td>' . $this->getSWSSonder($data[0]) . '</td>';
             $html .= '<td>' . $this->getAllSonderaBezFormat($data[0]) . '</td>';
-            $html .= '<td>???</td>';
+            $html .= '<td>' . $this->calcNettoLehre($data[0]) . '</td>';
             $html .= '<td>' . $this->calcDeltaSWS($data[0]) . '</td>';
             $html .= '<td>' . $this->getCurrentUeberstunden($data[0]) . '</td>';
-            $html .= '<td>' . $this->calcUeberstunden($data[0]) . '</td>';
+            $ueberstunden = $this->calcUeberstunden($data[0]);
+            $html .= '<td>' . $ueberstunden . '</td>';
             $html .= '</tr>';
+
+            $counter++;
+            $this->summeUeberstunden += $ueberstunden;
         }
 
     }
 
     /**
      * @function createTableFooter
-     * Schließt die Tabelle
+     * Schließt die Tabelle mit Summe der Ueberstunden
      * @param $html
      * Referenz auf die gesamte Ausgabe
      */
     private function createTableFooter(&$html)
     {
+        $html .= '<tr>';
+        $html .= '<th colspan="11">Summe</th>';
+        $html .= '<th colspan="3">' . $this->summeUeberstunden . '</th>';
+        $html .= '</tr>';
+
         $html .= '</table>';
     }
 }

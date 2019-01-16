@@ -42,13 +42,13 @@ class Benutzersitzung extends Hilfsmethoden
             //Prüfen der Rolle aus der Session
             switch ($this->getSession("Rolle")) {
                 case "Dozent":
-                    include_once("dozentsb.php");
+                    include_once("nav/dozentsb.php");
                     break;
                 case "Studiendekan":
-                    include_once("studiendekansb.php");
+                    include_once("nav/studiendekansb.php");
                     break;
                 case "Sekretariat":
-                    include_once("sekretariatsb.php");
+                    include_once("nav/sekretariatsb.php");
                     break;
 
                 //Fehler bei der Sessioninitialisierung

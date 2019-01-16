@@ -75,8 +75,9 @@ class DozentBearbeiten extends Benutzersitzung
      */
     private function createEditDozent()
     {
+        $output = '<div class=main>';
         //Formularbegin
-        $output = "<form method='post'>";
+        $output .= "<form method='post'>";
 
         //SQL-Statement für die Bearbeitung eines Dozenten
         $statement = $this->dbh->prepare('SELECT * FROM `dozent` WHERE `ID_DOZENT` =:DozentID ');
@@ -92,18 +93,45 @@ class DozentBearbeiten extends Benutzersitzung
         //[5]=Ueberstunden
         //[6]=Rollenname
 
-        $output .= "<input type='text' name='Name' id='Name' value='" . $data[1] . "'><br>";
-        $output .= "<input type='text' name='Vorname' id='Vorname' value='" . $data[2] . "'><br>";
-        $output .= "<input type='text' name='Titel' id='Titel' value='" . $data[3] . "'><br>";
-        $output .= "<input type='text' name='SWSSemester' id='SWSSemester' value='" . $data[4] . "'><br>";
-        $output .= "<input type='text' name='Ueberstunden' id='Ueberstunden' value='" . $data[5] . "'><br>";
+        //Tabellenanfang
+        $output .= "<table>";
+
+        $output .= "<tr>
+<td>Name</td>
+<td><input type='text' name='Name' id='Name' value='" . $data[1] . "'></td>
+</tr>";
+        $output .= "<tr>
+<td>Vorname</td>
+<td><input type='text' name='Vorname' id='Vorname' value='" . $data[2] . "'></td>
+</tr>";
+        $output .= "<tr>
+<td>Titel</td>
+<td><input type='text' name='Titel' id='Titel' value='" . $data[3] . "'></td>
+</tr>";
+        $output .= "<tr>
+<td>SWS</td>
+<td><input type='text' name='SWSSemester' id='SWSSemester' value='" . $data[4] . "'></td>
+</tr>";
+        $output .= "<tr>
+<td>Überstunden</td>
+<td><input type='text' name='Ueberstunden' id='Ueberstunden' value='" . $data[5] . "'></td>
+</tr>";
+
         //Zwischenspeicherung der ID für das Aktualisieren
         $output .= "<input type='hidden' name='DozentID' id='DozentID' value='" . $this->dozentID . "'><br>";
 
-        $output .= "<input type='submit' name='submitSpeichern' id='submitSpeichern' value='Speichern'>";
+        $output .= '<tr>
+<td colspan="2">
+<button class="submitButtons" type="submit" name="submitSpeichern" id="submitSpeichern" value="Speichern">Speichern</button>
+</td>
+</tr>';
+
+        //Tabellenende
+        $output .= "</table>";
         //Formularende
         $output .= "</form>";
 
+        $output .= '</div>';
         echo $output;
     }
 
@@ -123,6 +151,15 @@ class DozentBearbeiten extends Benutzersitzung
             //Fehler beim Löschen aufgetreten
             $this->message = "Fehler";
         }
+    }
+
+    /**
+     * @function showMessage
+     * Liefert Meldungen über Javascript alert() zurück
+     */
+    public function showMessage()
+    {
+        echo "<script type='text/javascript'>alert('$this->message');</script>";
     }
 
     /**
@@ -153,14 +190,5 @@ class DozentBearbeiten extends Benutzersitzung
             //Fehler beim aktualisieren
             $this->message = "Fehler";
         }
-    }
-
-    /**
-     * @function showMessage
-     * Liefert Meldungen über Javascript alert() zurück
-     */
-    public function showMessage()
-    {
-        echo "<script type='text/javascript'>alert('$this->message');</script>";
     }
 }

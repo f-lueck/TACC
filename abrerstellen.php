@@ -23,9 +23,9 @@ $obj = new AbrErstellen();
             Fakultät Informatik <br>
             Der Dekan </p>
         <br>
-        Abrechnung der Lehrveranstaltungen für das SOMMER/WINTERSEMESTER 2018<br>
+        Abrechnung der Lehrveranstaltungen für das <?php echo $obj->formatSemester($obj->getCurrentSemester()) ?><br>
         <br><br>
-        Name: DOZENT<br>
+        Name: <?php echo $obj->formatDozent($obj->getDozent($obj->getSession('IdDozent'))) ?><br>
 
         <form method="post">
             <div class="lv">
@@ -34,18 +34,21 @@ $obj = new AbrErstellen();
                 ?>
             </div>
             <br>
-            <?php $obj->setCounter(1);
+            <?php $obj->addCounter(1);
             $obj->getCounter() ?>. Praxisprojekte / Abschlussarbeiten <input type="number"
                                                                              value="<?php echo $obj->getSWSZusatz($obj->getSession("IdDozent")) ?>"><br>
-            <?php $obj->setCounter(1);
+            <?php $obj->addCounter(1);
             $obj->getCounter() ?>.Verfügungsstunden für <input type="number"
                                                                value="<?php echo $obj->getSWSSonder($obj->getSession("IdDozent")) ?>"><br>
-            <?php $obj->setCounter(1);
-            $obj->getCounter() ?>.In anderen Fakultäten <input type="text"><br>
-            <input type="text"><input type="text"><br>
-            <input type="text"><input type="text"><br>
-            <input type="text"><input type="text"><br>
-            Summe: <?php $obj->summeSWS() ?>
+            <?php $obj->addCounter(1);
+            $obj->getCounter() ?>.Verfügungsstunden für F+E<input type="number" name="F+E" id="F+E"
+                                                                  value="<?php echo $obj->getFE($obj->getSession("IdDozent")) ?>"><br>
+            <?php $obj->addCounter(1);
+            $obj->getCounter() ?>.In anderen Fakultäten <input type="number" value="<?php echo $obj->getSWSInAF($obj->getSession("IdDozent")) ?>"><br>
+            <input type="text" name="LVAFN1" id="LVAFN1"><input type="number" name="LVAFSWS1" id="LVAFSWS1"><br>
+            <input type="text" name="LVAFN2" id="LVAFN2"><input type="number" name="LVAFSWS2" id="LVAFSWS2"><br>
+            <input type="text" name="LVAFN3" id="LVAFN3"><input type="number" name="LVAFSWS3" id="LVAFSWS3"><br>
+            Zwischensumme (ohne andere Fakultäten): <?php echo $obj->summeSWS() ?>
             <br><br>
             <div class="sondera">
                 <?php
@@ -68,8 +71,8 @@ $obj = new AbrErstellen();
 
             </div>
             <br>
-            Sonstige Anmerkungen<br>
-            <textarea id="text" name="text" rows="10" cols="30"></textarea>
+            Sonstige Anmerkungen (max. 320 Zeichen)<br>
+            <textarea id="text" name="text" rows="10" cols="30" maxlength="320"></textarea>
             <br><br>
             <br><br>
             <div class="buttonholder">
@@ -80,6 +83,5 @@ $obj = new AbrErstellen();
         </form>
     </div>
 </div>
-<!-- popup mit frage: "Ist alles korrekt?" -->
 </body>
 </html>

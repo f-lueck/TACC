@@ -15,10 +15,11 @@ $obj = new SemesterabrErstellen();
     <div class="center">
         <h1>Semesterabrechnung</h1><br>
         <form method="post">
-            <?php
-            $obj->createDozentDropdown();
-            ?>
             <div class="buttonholder">
+                <?php
+                $obj->createDozentDropdown();
+                ?>
+
                 <button class="submitButtons" type="submit" name="selectDozent" id="selectDozent">Erzeugen</button>
             </div>
         </form>

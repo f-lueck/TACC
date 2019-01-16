@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="utf-8"/>
     <title>T-ACC</title>
-    <link rel="stylesheet" href="stylesheet.css">
+    <link rel="stylesheet" href="../../stylesheet.css">
 </head>
 
 <body>
@@ -30,7 +30,6 @@
                     <li><a href="sonderazuweisen.php">Sonderaufgaben zuweisen</a></li>
                     <li><a href="dozentanlegen.php">Dozenten anlegen</a></li>
                     <li><a href="dozentbearbeiten.php">Dozenten bearbeiten</a></li>
-                    <li><a href="#passwortadmin">Passwortverwaltung</a></li>
                 </ul>
             </li>
             <li><a href="semesterabrerstellen.php">Semesterabrechnung erstellen</a></li>

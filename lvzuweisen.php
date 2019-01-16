@@ -34,39 +34,10 @@ $obj = new LvZuweisen();
 
         <div class="flex-container-tabelle">
             <div>
-                <table>
-                    <caption>Informatik</caption>
-                    <tr>
-                        <th>Name Lehrveranstaltung</th>
-                        <th>SWS (muss)</th>
-                        <th>Auswahl</th>
-                        <th>SWS gewünscht</th>
-                    </tr>
-                    <tr>
-                        <td>LV 1</td>
-                        <td> 4</td>
-                        <td><input type="checkbox" name="auswahl" value="1"></td>
-                        <td><input type="number" name="gewuenschteAnzahl" id="gewanzahl" step="0.5" min="0"></td>
-                    </tr>
-                    <tr>
-                        <th colspan="4">Computer Engineering</th>
-                    </tr>
-                    <tr>
-                        <th colspan="4">Information Engineering</th>
-                    </tr>
-                    <tr>
-                        <th colspan="4">Medieninformatik</th>
-                    </tr>
-                    <tr>
-                        <th colspan="4">Software Engineering</th>
-                    </tr>
-                    <tr>
-                        <th colspan="4">Sytem Engineering</th>
-                    </tr>
-                </table>
-                <button class="submitButtons" type="submit" name="submit" id="submit" value="Speichern">Speichern
-                </button>
-                <button class="submitButtons" type="reset">Reset</button>
+                <?php echo $obj->showLVInformatik() ?>
+            </div>
+            <div>
+                <?php echo $obj->showLVEigene() ?>
             </div>
             <div>
                 <table>
@@ -148,7 +119,7 @@ $obj = new LvZuweisen();
             <input type="number" name="SWS" id="SWS" value="SWS">
             <br>
             <br>
-            <input type="submit" id="submit" name="submit" value="Bestätigen">
+            <input type="submit" id="submit1" name="submit1" value="Bestätigen">
         </form>
     </div>
 </div>

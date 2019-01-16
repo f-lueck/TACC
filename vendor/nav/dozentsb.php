@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="utf-8"/>
     <title>T-ACC</title>
-    <link rel="stylesheet" href="stylesheet.css">
+    <link rel="stylesheet" href="../../stylesheet.css">
 </head>
 <body>
 

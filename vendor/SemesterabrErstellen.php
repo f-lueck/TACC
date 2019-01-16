@@ -92,7 +92,9 @@ class SemesterabrErstellen extends Benutzersitzung
         $this->createSemesterabrTableBot($output);
 
         $output .= '<br>';
-        $output .= '<input type="submit" name="print" id="print" value="Als PDF">';
+        $output .= '<div class="buttonholder">';
+        $output .= '<button class="submitButtons" type="submit" name="print" id="print">Als PDF</button>';
+        $output .= '</div>';
         //Formular-Ende
         $output .= '</form>';
 
@@ -126,7 +128,28 @@ class SemesterabrErstellen extends Benutzersitzung
         $html .= '<br>';
         $html .= $this->formatDozent($this->getDozent($this->dozentID)) . '<br>';
         $html .= '<br>';
-        $html .= 'Lehrdeputat: <> SWS<br>';
+        $html .= 'Lehrdeputat: ' . $this->getDeputat($this->dozentID) . ' SWS<br>';
+    }
+
+    /**
+     * @function getDeputat
+     * Lädt das Lehrdeputat eines Dozenten aus der Datenbank
+     * @param $dozentID
+     * ID des Dozenten
+     * @return mixed
+     * Deputat in SWS
+     */
+    private function getDeputat($dozentID)
+    {
+
+        $statement = $this->dbh->prepare('SELECT `SWS_PRO_SEMESTER` FROM `dozent` WHERE `ID_DOZENT` = :DozentID');
+        $result = $statement->execute(array('DozentID' => $dozentID));
+
+        //fetched:
+        //[0]=Deputat
+
+        $data = $statement->fetch();
+        return $data[0];
     }
 
     /**
@@ -180,6 +203,20 @@ WHERE `DOZENT_ID_DOZENT` =:DozentID");
             $html .= '<td>' . $data[2] . '</td>';
             $html .= '</tr>';
         }
+        $this->createBlankTableEntries($html);
+    }
+
+    /**
+     * @function createBlankTableEntries
+     * Erzeugt leere Zeilen auf Basis der Anzahl
+     * @param $html
+     * Zu ergänzendes HTML Formular
+     * @param $anz
+     * Anzahl wie viele leere Zeilen hinzugefügt werden sollen
+     */
+    private function createBlankTableEntries(&$html)
+    {
+        $html .= '<td colspan="3"></td>';
     }
 
     /**
@@ -208,11 +245,7 @@ WHERE `DOZENT_ID_DOZENT` =:DozentID");
         $html .= '<td>' . $this->getSWSArt($this->dozentID, $this->tutoriumID) . '</td>';
         $html .= '</tr>';
 
-        $html .= '<tr>';
-        $html .= '<td>in anderen Fakultäten</td>';
-        $html .= '<td></td>';
-        $html .= '<td>SWS</td>';
-        $html .= '</tr>';
+        $this->createBlankTableEntries($html);
     }
 
     /**
@@ -242,9 +275,15 @@ WHERE `DOZENT_ID_DOZENT` =:DozentID");
     private function createSemesterabrTableSondera(&$html)
     {
         $html .= '<tr>';
+        $html .= '<td>in anderen Fakultäten</td>';
+        $html .= '<td></td>';
+        $html .= '<td>' . $this->getSWSInAF($this->dozentID) . '</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
         $html .= '<td>Verfügungsstunden F+E</td>';
         $html .= '<td></td>';
-        $html .= '<td>SWS</td>';
+        $html .= '<td>' . $this->getFE($this->dozentID) . '</td>';
         $html .= '</tr>';
 
         //SQL-Statement zum Laden der Sonderaufgabenbezeichnung und den SWS
@@ -275,53 +314,25 @@ WHERE `DOZENT_ID_DOZENT` = :DozentID");
     private function createSemesterabrTableSumme(&$html)
     {
 
-        $this->createBlankTableEntries($html, 2);
+        $this->createBlankTableEntries($html);
 
         $html .= '<tr>';
-        $html .= '<td>Summe</td>';
-        $html .= '<td></td>';
-        $html .= '<td>' . $this->calcSummeSWS($this->dozentID) . '</td>';
+        $html .= '<th colspan="2">Summe</th>';
+        $html .= '<th>' . $this->summeSWS($this->dozentID) . '</th>';
         $html .= '</tr>';
     }
 
     /**
-     * @function createBlankTableEntries
-     * Erzeugt leere Zeilen auf Basis der Anzahl
-     * @param $html
-     * Zu ergänzendes HTML Formular
-     * @param $anz
-     * Anzahl wie viele leere Zeilen hinzugefügt werden sollen
+     * @function summeSWS
+     * Liefert die Summe aller aktuellen Veranstaltungen
      */
-    private function createBlankTableEntries(&$html, $anz)
+    public function summeSWS()
     {
-        for ($i = 0; $i < $anz; $i++) {
-            $html .= '<tr>';
-            $html .= '<td>&nbsp</td>';
-            $html .= '<td>&nbsp</td>';
-            $html .= '<td>&nbsp</td>';
-            $html .= '</tr>';
-        }
-    }
-
-    /**
-     * @function calcSummeSWS
-     * Liefert die Summe der SWS aller Veranstaltungen und Aufgaben eines Dozenten zurück
-     * @param $dozentID
-     * ID des Dozenten
-     * @return float|int|string
-     * Summe der SWS
-     */
-    private function calcSummeSWS($dozentID)
-    {
-        $sws = 0;
-        $sws += $this->getSWSLv($dozentID);
-        $sws += $this->getSWSArt($dozentID, $this->praxisprojektID);
-        $sws += $this->calcAbschlussarbeitenSWS($dozentID);
-        $sws += $this->getSWSArt($dozentID, $this->tutoriumID);
-        //in anderen Fakultäten
-        //Verfügungsstunden
-        $sws += $this->getSWSSonder($dozentID);
-
+        $sws = $this->getSWSZusatz($this->dozentID);
+        $sws += $this->getSWSSonder($this->dozentID);
+        $sws += $this->getSWSLv($this->dozentID);
+        $sws += $this->getFE($this->dozentID);
+        $sws += $this->getSWSInAF($this->dozentID);
         return $sws;
     }
 
@@ -334,28 +345,24 @@ WHERE `DOZENT_ID_DOZENT` = :DozentID");
     private function createSemesterabrTableBot(&$html)
     {
 
-        $this->createBlankTableEntries($html, 2);
+        $this->createBlankTableEntries($html);
 
         $html .= '<tr>';
-        $html .= '<td>Mehr-/Minderarbeit im Semester</td>';
-        $html .= '<td></td>';
-        $html .= '<td>' . $this->calcDeltaSWS($this->dozentID) . '</td>';
+        $html .= '<th colspan="2">Mehr-/Minderarbeit im Semester</th>';
+        $html .= '<th>' . $this->calcDeltaSWS($this->dozentID) . '</th>';
         $html .= '</tr>';
 
-        $this->createBlankTableEntries($html, 1);
+        $this->createBlankTableEntries($html);
 
         $html .= '<tr>';
-        $html .= '<td>aufgelaufene Mehr-/Minderarbeit</td>';
-        $html .= '<td></td>';
-        $html .= '<td>' . $this->calcUeberstunden($this->dozentID) . '</td>';
+        $html .= '<th colspan="2">aufgelaufene Mehr-/Minderarbeit</th>';
+        $html .= '<th>' . $this->calcUeberstunden($this->dozentID) . '</th>';
         $html .= '</tr>';
 
         $html .= '<input type="hidden" name="DozentID" id="DozentID" value="' . $this->dozentID . '">';
 
         //Tabellenende
         $html .= '</table>';
-        //Formularende
-        $html .= '</form>';
         $html .= '</div>';
     }
 
@@ -369,7 +376,7 @@ WHERE `DOZENT_ID_DOZENT` = :DozentID");
      */
     private function calcDeltaSWS($dozentID)
     {
-        $swsGeleistet = $this->calcSummeSWS($dozentID);
+        $swsGeleistet = $this->summeSWS($dozentID);
         $swsSoll = $this->getSWSProSemester($dozentID);
         $delta = $swsGeleistet - $swsSoll;
 
@@ -420,6 +427,9 @@ WHERE `DOZENT_ID_DOZENT` = :DozentID");
         $pdf->SetTitle('Semesterabrechnung');
         $pdf->SetSubject('Semesterabrechnung');
 
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+
         $pdf->AddPage();
 
         //Füllen der PDF Datei
@@ -462,13 +472,12 @@ WHERE `DOZENT_ID_DOZENT` = :DozentID");
      */
     private function createCellPDFTop(&$pdf)
     {
-        $pdf->Cell(160, 0, 'Semesterabrechnung ' . $this->formatSemester($this->getCurrentSemester()), 0, false, 'L', 0, '', 0);
-        $pdf->Cell(30, 0, $this->getCurrentDate(), 0, 1, 'L', 0, '', 0);
+        $pdf->Cell(45, 0, 'Semesterabrechnung ', 0, false, 'L', 0, '', 0);
+        $pdf->Cell(20, 0, $this->formatSemester($this->getCurrentSemester()), 0, 0, 'L', 0, '', 0);
+        $pdf->Cell(0, 0, $this->getCurrentDate(), 0, 1, 'R', 0, '', 0);
         $pdf->Cell(0, 0, $this->formatDozent($this->getDozent($this->dozentID)), 0, 1, 'L', 0, '', 0);
-        $pdf->Cell(0, 0, '', 0, 1, 'L', 0, '', 0);
-        $pdf->Cell(60, 0, 'Lehrdeputat', 0, false, 'L', 0, '', 0);
-        $pdf->Cell(20, 0, 'Deputat', 0, false, 'L', 0, '', 0);
-        $pdf->Cell(30, 0, $this->getSWSProSemester($this->dozentID), 0, 1, 'L', 0, '', 0);
+        $pdf->Cell(45, 0, 'Lehrdeputat: ', 0, 0, 'L', 0, '', 0);
+        $pdf->Cell(45, 0, $this->getSWSProSemester($this->dozentID) . ' SWS', 0, 1, 'L', 0, '', 0);
     }
 
     /**
@@ -480,12 +489,11 @@ WHERE `DOZENT_ID_DOZENT` = :DozentID");
     private function createCellPDFTableTop(&$pdf)
     {
         $pdf->Cell(100, 0, '', 0, false, 'L', 0, '', 0);
-        $pdf->Cell(45, 0, 'Semester', 0, false, 'L', 0, '', 0);
-        $pdf->Cell(45, 0, 'SWS', 0, 1, 'L', 0, '', 0);
-        $pdf->Cell(0, 0, '', 0, 1, 'L', 0, '', 0);
-        $pdf->Cell(100, 0, 'bisher aufgelaufene Mehr-/Minderarbeit', 0, false, 'L', 0, '', 0);
-        $pdf->Cell(60, 0, $this->getCurrentUeberstunden($this->dozentID), 0, 1, 'L', 0, '', 0);
-        $pdf->Cell(0, 0, '', 0, 1, 'L', 0, '', 0);
+        $pdf->Cell(45, 0, 'Semester', 1, false, 'L', 0, '', 0);
+        $pdf->Cell(45, 0, 'SWS', 1, 1, 'L', 0, '', 0);
+        $pdf->Cell(100, 0, 'bisher aufgelaufene Mehr-/Minderarbeit', 1, false, 'L', 0, '', 0);
+        $pdf->Cell(45, 0, '', 1, 0, 'L', 0, '', 0);
+        $pdf->Cell(45, 0, $this->getCurrentUeberstunden($this->dozentID), 1, 1, 'L', 0, '', 0);
     }
 
     /**
@@ -508,10 +516,12 @@ WHERE `DOZENT_ID_DOZENT` =:DozentID");
         //[1]=Name des Semesters
         //[2]=SWS
 
+        $pdf->Cell(0, 0, '', 1, 1, 'L', 0, '', 0);
+
         while ($data = $statement->fetch()) {
-            $pdf->Cell(100, 0, $data[0], 0, false, 'L', 0, '', 0);
-            $pdf->Cell(45, 0, $data[1], 0, false, 'L', 0, '', 0);
-            $pdf->Cell(45, 0, $data[2], 0, 1, 'L', 0, '', 0);
+            $pdf->Cell(100, 0, $data[0], 1, false, 'L', 0, '', 0);
+            $pdf->Cell(45, 0, $data[1], 1, false, 'L', 0, '', 0);
+            $pdf->Cell(45, 0, $data[2], 1, 1, 'L', 0, '', 0);
         }
     }
 
@@ -523,17 +533,16 @@ WHERE `DOZENT_ID_DOZENT` =:DozentID");
      */
     private function createCellPDFTableZusatza(&$pdf)
     {
-        $pdf->Cell(100, 0, 'Praxisprojekte', 0, false, 'L', 0, '', 0);
-        $pdf->Cell(45, 0, '', 0, false, 'L', 0, '', 0);
-        $pdf->Cell(45, 0, $this->getSWSArt($this->dozentID, $this->praxisprojektID), 0, 1, 'L', 0, '', 0);
+        $pdf->Cell(0, 0, '', 1, 1, 'L', 0, '', 0);
 
-        $pdf->Cell(100, 0, 'Abschlussarbeiten', 0, false, 'L', 0, '', 0);
-        $pdf->Cell(45, 0, '', 0, false, 'L', 0, '', 0);
-        $pdf->Cell(45, 0, $this->calcAbschlussarbeitenSWS($this->dozentID), 0, 1, 'L', 0, '', 0);
+        $pdf->Cell(145, 0, 'Praxisprojekte', 1, false, 'L', 0, '', 0);
+        $pdf->Cell(45, 0, $this->getSWSArt($this->dozentID, $this->praxisprojektID), 1, 1, 'L', 0, '', 0);
 
-        $pdf->Cell(100, 0, 'Tutorien', 0, false, 'L', 0, '', 0);
-        $pdf->Cell(45, 0, '', 0, false, 'L', 0, '', 0);
-        $pdf->Cell(45, 0, $this->getSWSArt($this->dozentID, $this->tutoriumID), 0, 1, 'L', 0, '', 0);
+        $pdf->Cell(145, 0, 'Abschlussarbeiten', 1, false, 'L', 0, '', 0);
+        $pdf->Cell(45, 0, $this->calcAbschlussarbeitenSWS($this->dozentID), 1, 1, 'L', 0, '', 0);
+
+        $pdf->Cell(145, 0, 'Tutorien', 1, false, 'L', 0, '', 0);
+        $pdf->Cell(45, 0, $this->getSWSArt($this->dozentID, $this->tutoriumID), 1, 1, 'L', 0, '', 0);
     }
 
     /**
@@ -544,13 +553,13 @@ WHERE `DOZENT_ID_DOZENT` =:DozentID");
      */
     private function createCellPDFTableFakVer(&$pdf)
     {
-        $pdf->Cell(100, 0, 'in anderen Fakultäten', 0, false, 'L', 0, '', 0);
-        $pdf->Cell(45, 0, '', 0, false, 'L', 0, '', 0);
-        $pdf->Cell(45, 0, 'SWS', 0, 1, 'L', 0, '', 0);
+        $pdf->Cell(0, 0, '', 1, 1, 'L', 0, '', 0);
 
-        $pdf->Cell(100, 0, 'Verfügungsstunden F+E', 0, false, 'L', 0, '', 0);
-        $pdf->Cell(45, 0, '', 0, false, 'L', 0, '', 0);
-        $pdf->Cell(45, 0, 'SWS', 0, 1, 'L', 0, '', 0);
+        $pdf->Cell(145, 0, 'in anderen Fakultäten', 1, false, 'L', 0, '', 0);
+        $pdf->Cell(45, 0, $this->getSWSInAF($this->dozentID), 1, 1, 'L', 0, '', 0);
+
+        $pdf->Cell(145, 0, 'Verfügungsstunden F+E', 1, false, 'L', 0, '', 0);
+        $pdf->Cell(45, 0, $this->getFE($this->dozentID), 1, 1, 'L', 0, '', 0);
     }
 
     /**
@@ -572,9 +581,8 @@ WHERE `DOZENT_ID_DOZENT` = :DozentID");
         //[1]=SWS
 
         while ($data = $statement->fetch()) {
-            $pdf->Cell(100, 0, $data[0], 0, false, 'L', 0, '', 0);
-            $pdf->Cell(45, 0, '', 0, false, 'L', 0, '', 0);
-            $pdf->Cell(45, 0, $data[1], 0, 1, 'L', 0, '', 0);
+            $pdf->Cell(145, 0, $data[0], 1, false, 'L', 0, '', 0);
+            $pdf->Cell(45, 0, $data[1], 1, 1, 'L', 0, '', 0);
         }
     }
 
@@ -586,12 +594,10 @@ WHERE `DOZENT_ID_DOZENT` = :DozentID");
      */
     private function createCellPDFTableSumme(&$pdf)
     {
-        $pdf->Cell(0, 0, '', 0, 1, 'L', 0, '', 0);
-        $pdf->Cell(0, 0, '', 0, 1, 'L', 0, '', 0);
+        $pdf->Cell(0, 0, '', 1, 1, 'L', 0, '', 0);
 
-        $pdf->Cell(100, 0, 'Summe', 0, false, 'L', 0, '', 0);
-        $pdf->Cell(45, 0, '', 0, false, 'L', 0, '', 0);
-        $pdf->Cell(45, 0, $this->calcSummeSWS($this->dozentID), 0, 1, 'L', 0, '', 0);
+        $pdf->Cell(145, 0, 'Summe', 1, false, 'L', 0, '', 0);
+        $pdf->Cell(45, 0, $this->summeSWS($this->dozentID), 1, 1, 'L', 0, '', 0);
     }
 
     /**
@@ -602,18 +608,17 @@ WHERE `DOZENT_ID_DOZENT` = :DozentID");
      */
     private function createCellPDFTableBottom(&$pdf)
     {
-        $pdf->Cell(0, 0, '', 0, 1, 'L', 0, '', 0);
-        $pdf->Cell(0, 0, '', 0, 1, 'L', 0, '', 0);
-
-        $pdf->Cell(100, 0, 'Mehr-/Minderarbeit im Semester', 0, false, 'L', 0, '', 0);
-        $pdf->Cell(45, 0, '', 0, false, 'L', 0, '', 0);
-        $pdf->Cell(45, 0, $this->calcDeltaSWS($this->dozentID), 0, 1, 'L', 0, '', 0);
+        $pdf->Cell(145, 0, 'Mehr-/Minderarbeit im Semester', 1, false, 'L', 0, '', 0);
+        $pdf->Cell(45, 0, $this->calcDeltaSWS($this->dozentID), 1, 1, 'L', 0, '', 0);
+        $pdf->Cell(145, 0, 'aufgelaufene Mehr-/Minderarbeit', 1, false, 'L', 0, '', 0);
+        $pdf->Cell(45, 0, $this->calcUeberstunden($this->dozentID), 1, 1, 'L', 0, '', 0);
 
         $pdf->Cell(0, 0, '', 0, 1, 'L', 0, '', 0);
 
-        $pdf->Cell(100, 0, 'aufgelaufene Mehr-/Minderarbeit', 0, false, 'L', 0, '', 0);
-        $pdf->Cell(45, 0, '', 0, false, 'L', 0, '', 0);
-        $pdf->Cell(45, 0, $this->calcUeberstunden($this->dozentID), 0, 1, 'L', 0, '', 0);
-
+        $pdf->Cell(0, 0, 'Datum, Unterschrift', 0, 1, 'L', 0, '', 0);
+        $pdf->Cell(0, 0, '', 1, 1, 'L', 0, '', 0);
+        $pdf->Cell(110, 0, '', 0, false, 'L', 0, '', 0);
+        $pdf->Cell(15, 0, 'Name', 0, false, 'L', 0, '', 0);
+        $pdf->Cell(65, 0, '', 1, 1, 'L', 0, '', 0);
     }
 }

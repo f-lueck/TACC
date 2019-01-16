@@ -146,7 +146,7 @@ class LvBearbeiten extends Benutzersitzung
 
         //SQL-Statement für das Aktualisieren einer Veranstaltung
         $statement = $this->dbh->prepare("UPDATE `veranstaltung` SET `BEZEICHNUNG`= :Bezeichnung,`SWS`= :SWS,
-`CREDITS`= :Credits,`HAUEFIGKEIT_PA`= :Haeufigkeit,`FAKTOR_DOPPELUNG`= :Doppelung,`SOMMERSEMESTER`= :Sommersemester,`KOSTEN_PA`= :Kosten WHERE `ID_VERANSTALTUNG` = :LvID");
+`CREDITS`= :Credits,`HAEUFIGKEIT_PA`= :Haeufigkeit,`FAKTOR_DOPPELUNG`= :Doppelung,`SOMMERSEMESTER`= :Sommersemester,`KOSTEN_PA`= :Kosten WHERE `ID_VERANSTALTUNG` = :LvID");
         $result = $statement->execute(array("Bezeichnung" => $bezeichnung, "SWS" => $sws, "Credits" => $credits, "Haeufigkeit" => $haeufigkeit, "Doppelung" => $doppelung,
             "Sommersemester" => $sommersemester, "Kosten" => $kosten, "LvID" => $LvID));
 
