@@ -196,6 +196,7 @@ INNER JOIN dozent ON benutzerkonto.DOZENT_ID_DOZENT = dozent.ID_DOZENT WHERE `BE
         //Füllen der Session
         $_SESSION["IdDozent"] = $data[0];
         $_SESSION["Rolle"] = $data[1];
+        $_SESSION["IdSemester"] = $this->getCurrentSemester();
     }
 
     /**

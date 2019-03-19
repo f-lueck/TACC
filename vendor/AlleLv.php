@@ -228,7 +228,7 @@ WHERE `DOZENT_ID_DOZENT` = :DozentID');
      */
     private function createTableHeader()
     {
-        $output = '<table align="center" style="width:50%" border="1">';
+        $output = '<table align="center" style="width:70%" border="1">';
         $output .= '<thead>';
         $output .= '<tr>';
         $output .= '<th>Dozent</th>';
@@ -246,5 +246,18 @@ WHERE `DOZENT_ID_DOZENT` = :DozentID');
         $output .= '<tbody>';
 
         return $output;
+    }
+
+    public function buttonDownload()
+    {
+        $rolle = $this->getSession('Rolle');
+        $button = '<div class="buttonholder">';
+        $button .= '<form method="post">';
+        $button .= '<button class="submitButtons" type="submit" name="print" id="print">Herunterladen</button>';
+        $button .= '</form>';
+        $button .= '</div>';
+        if ($rolle == 'Studiendekan' || $rolle == 'Sekretariat') {
+            echo $button;
+        }
     }
 }

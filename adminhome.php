@@ -14,7 +14,7 @@ $obj = new Home();
 <body>
 <div class="main">
     <div class="center">
-        <h1>Einsicht</h1>
+        <h1>Administration</h1>
         <br>
         <div class="flex-container">
             <a class="button" href="lvzuweisen.php">LV zuweisen</a>

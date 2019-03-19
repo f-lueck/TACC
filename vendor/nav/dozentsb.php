@@ -13,6 +13,7 @@
         <ul>
             <li><a href="dozenthome.php">Home</a></li>
             <li><a href="lvzuweisen.php">Veranstaltung zuweisen</a></li>
+            <li><a href="allelv.php">Veranstaltungen einsehen</a> </li>
             <li><a href="meineauftraege.php">Meine Aufträge</a></li>
             <li><a class="dropdown-btn">Meine <br>Zusatzaufgaben<i class="fa fa-caret-down"></a></i>
                 <ul class="dropmenu">

@@ -123,6 +123,7 @@ class lvZuweisen extends Benutzersitzung
 <tr>
 <th>Name Lehrveranstaltung</th>
 <th>SWS (muss)</th>
+<th>Belegt von</th>
 <th>Auswahl</th>
 <th>SWS gewünscht</th>
 </tr>';
@@ -140,6 +141,7 @@ class lvZuweisen extends Benutzersitzung
             $html .= '<tr>';
             $html .= '<td>' . $data[1] . '</td>';
             $html .= '<td>' . $data[2] . '</td>';
+            $html .= '<td>'.$this->getAllSWSLv($data[0]).'</td>';
             $html .= '<td><input type="checkbox" name="check' . $data[0] . '" id="check' . $data[0] . '" value="' . $data[0] . '"></td>';
             $html .= '<td><input type="number" name="sws' . $data[0] . '" id="sws' . $data[0] . '" min="0"></td>';
             $html .= '</tr>';
@@ -165,6 +167,7 @@ class lvZuweisen extends Benutzersitzung
 <tr>
 <th>Name Lehrveranstaltung</th>
 <th>SWS (muss)</th>
+<th>Belegt von</th>
 <th>Auswahl</th>
 <th>SWS gewünscht</th>
 </tr>';
@@ -182,8 +185,9 @@ class lvZuweisen extends Benutzersitzung
             $html .= '<tr>';
             $html .= '<td>' . $data[1] . '</td>';
             $html .= '<td>' . $data[2] . '</td>';
+            $html .= '<td>'.$this->getAllSWSLv($data[0]).'</td>';
             $html .= '<td><input type="checkbox" name="check' . $data[0] . '" id="check' . $data[0] . '" value="' . $data[0] . '"></td>';
-            $html .= '<td><input type="number" name="sws' . $data[0] . '" id="sws' . $data[0] . '" min="0"></td>';
+            $html .= '<td><input type="number" name="sws' . $data[0] . '" id="sws' . $data[0] . '" min="0" width="5 %"></td>';
             $html .= '</tr>';
         }
         $html .= '</table>';
@@ -191,5 +195,23 @@ class lvZuweisen extends Benutzersitzung
                 </button>';
         $html .= '</form>';
         return $html;
+    }
+
+    private function getAllSWSLv($lvID){
+        $semseterID = $this->getSession('IdSemester');
+        $statement = $this->dbh->prepare('SELECT dozent.NAME, `WIRKLICHE_SWS` FROM `dozent_hat_veranstaltung_in_s` 
+  INNER JOIN dozent ON dozent_hat_veranstaltung_in_s.DOZENT_ID_DOZENT = dozent.ID_DOZENT WHERE `VERANSTALTUNG_ID_VERANSTALTUNG` = :LvID AND `SEMESTER_ID_SEMESTER` = :SemesterID');
+        $result = $statement->execute(array('LvID'=>$lvID, 'SemesterID'=>$semseterID));
+        $sws = '';
+        $counter = 0;
+        while ($data = $statement->fetch()){
+            if ($counter == 0){
+                $sws .= $data[0] . '/' . $data[1];
+            } else {
+                $sws .= '; '.$data[0] . '/' . $data[1];
+            }
+            $counter++;
+        }
+        return $sws;
     }
 }

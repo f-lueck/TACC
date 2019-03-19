@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <?php include("header.php"); ?>
 <head>
     <meta charset="utf-8"/>
@@ -12,7 +12,7 @@
     <nav class="menu">
         <ul>
             <li><a href="studiendekanhome.php">Home</a></li>
-            <li><a class="dropdown-btn" href="../../einsichthome.php">Einsicht<i class="fa fa-caret-down"></i></a>
+            <li><a class="dropdown-btn" href="einsichthome.php">Einsicht<i class="fa fa-caret-down"></i></a>
                 <ul class="dropmenu">
                     <li><a href="meineauftraege.php">Meine Aufträge</a></li>
                     <li><a href="allelv.php">Alle LV</a></li>
@@ -20,7 +20,7 @@
                     <li><a href="alledozenten.php">Alle Dozenten</a></li>
                 </ul>
             </li>
-            <li><a class="dropdown-btn" href="../../adminhome.php">Administration<i class="fa fa-caret-down"></i></a>
+            <li><a class="dropdown-btn" href="adminhome.php">Administration<i class="fa fa-caret-down"></i></a>
                 <ul class="dropmenu">
                     <li><a href="lvanlegen.php">LV anlegen</a></li>
                     <li><a href="lvbearbeiten.php">LV bearbeiten</a></li>
