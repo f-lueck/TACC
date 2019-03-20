@@ -30,6 +30,7 @@ class SemesterabrErstellen extends Benutzersitzung
     private $diplomarbeitID = 4;
     private $tutoriumID = 5;
     private $neueUeberstunden = 0;
+    private $semesterID;
 
     /**
      * SemesterabrErstellen constructor.
@@ -43,6 +44,8 @@ class SemesterabrErstellen extends Benutzersitzung
         $this->preventOpen();
         //Laden der Nabar
         $this->loadNav();
+
+        $this->semesterID = $this->getCurrentSemester();
 
         //Auswählen eines Dozenten
         if (isset($_POST["selectDozent"])) {
@@ -621,4 +624,107 @@ WHERE `DOZENT_ID_DOZENT` = :DozentID");
         $pdf->Cell(15, 0, 'Name', 0, false, 'L', 0, '', 0);
         $pdf->Cell(65, 0, '', 1, 1, 'L', 0, '', 0);
     }
+
+    /**
+     * @function createDozentTable
+     * Liefert die komplette Tabelle mit Dozenten, Status und Auswahl zurück
+     * @return string
+     * Die Tabelle
+     */
+    public function createDozentTable()
+    {
+        $html = '';
+        $this->createTableHeader($html);
+        $this->createTableContent($html);
+
+        $html .= '</table>';
+
+        return $html;
+    }
+
+    /**
+     * @function createTableHeader
+     * Erzeugt den Tabellen Header
+     * @param $html
+     * Zu ergänzender HTML Code
+     */
+    private function createTableHeader(&$html)
+    {
+        $html .= '<table border="1">';
+
+        $html .= '<tr>';
+        $html .= '<th>Titel</th>';
+        $html .= '<th>Nachname</th>';
+        $html .= '<th>Vorname</th>';
+        $html .= '<th>Status</th>';
+        $html .= '<th>Auswahl</th>';
+        $html .= '</tr>';
+    }
+
+    /**
+     * @function createTableContent
+     * Ergänzt die Tabelle um Informationen Titel, Name, Vorname, Status des jeweiligen Dozenten
+     * @param $html
+     * Zu ergänzender HTML Code
+     */
+    private function createTableContent(&$html)
+    {
+        $rolle = 'Sekretariat';
+
+        //SQL-Statement für das Laden der Titel, Nachnamen, Vornamen, IDs der Dozenten, sortiert nach Nachnamen
+        $statement = $this->dbh->prepare('SELECT `TITEL`, `NAME`, `VORNAME`, `ID_DOZENT` FROM `dozent` WHERE `ROLLE_BEZEICHNUNG` != :Rolle ORDER BY `NAME`');
+        $result = $statement->execute(array('Rolle' => $rolle));
+
+        //fetched:
+        //[0]=Titel
+        //[1]=Nachname
+        //[2]=Vorname
+        //[3]=ID des Dozenten
+
+        while ($data = $statement->fetch()) {
+            $html .= '<tr>';
+
+            $html .= '<td>' . $data[0] . '</td>';
+            $html .= '<td>' . $data[1] . '</td>';
+            $html .= '<td>' . $data[2] . '</td>';
+
+            $dozentID = $data[3];
+
+            $html .= '<td><div id="rectangle" style="background: ' . $this->getColorForChange($dozentID) . '"></div></td>';
+            $html .= '<td><input type="checkbox" name="check' . $dozentID . '" id="check' . $dozentID . '" value="' . $dozentID . '"></td>';
+
+            $html .= '<tr>';
+        }
+    }
+
+    /**
+     * @function getColorForChange
+     * Ermittelt die jeweilige Farbe für den Veränderungsgrad
+     * @param $dozentID
+     * ID des zu prüfenden Dozenten
+     * @return string
+     * Farbe
+     */
+    private function getColorForChange($dozentID)
+    {
+
+        //SQL-Statement für das Laden des höchsten Veränderungsgrads einer Veranstaltung eines Dozenten
+        $statement = $this->dbh->prepare('SELECT MAX(`VERAENDERUNG`) FROM `dozent_hat_veranstaltung_in_s` 
+WHERE `SEMESTER_ID_SEMESTER` = :SemesterID AND `DOZENT_ID_DOZENT` = :DozentID');
+        $statement->execute(array('SemesterID' => $this->semesterID, 'DozentID' => $dozentID));
+        $data = $statement->fetch();
+
+        //fetched:
+        //[0]=Maximaler Veränderungsgrad
+
+        switch ($data[0]) {
+            case 1:
+                return 'orange';
+            case 2:
+                return 'red';
+            default:
+                return 'green';
+        }
+    }
+
 }

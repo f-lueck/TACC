@@ -20,7 +20,12 @@ $obj = new SemesterabrErstellen();
                 $obj->createDozentDropdown();
                 ?>
 
-                <button class="submitButtons" type="submit" name="selectDozent" id="selectDozent">Erzeugen</button>
+                <?php
+                echo $obj->createDozentTable();
+                ?>
+                <div class="buttonholder">
+                    <button class="submitButtons" type="submit" id="print" name="print">Erzeugen</button>
+                </div>
             </div>
         </form>
     </div>

@@ -95,6 +95,7 @@ body {
     align-items: center;
 
 }
+
 /*SUBMIT BUTTONS*/
 .submitButtons {
     background-color: #004077;
@@ -117,7 +118,7 @@ body {
     color: white;
 }
 
-.buttonholder{
+.buttonholder {
     text-align: center;
 }
 
@@ -240,4 +241,7 @@ input[type="number"] {
     width: 80px;
 }
 
-
+#rectangle {
+    width: 50px;
+    height: 20px;
+}
