@@ -47,17 +47,74 @@ class SemesterabrErstellen extends Benutzersitzung
 
         $this->semesterID = $this->getCurrentSemester();
 
-        //Auswählen eines Dozenten
-        if (isset($_POST["selectDozent"])) {
-            $this->setDozentID($this->getPOST("Dozent"));
-            echo $this->showSemesterabrDozent();
+        //Drucken der Abrechnungen
+        if (isset($_POST["print"])) {
+            $this->createFor();
+        }
+    }
+
+    /**
+     * @function createFor
+     * Iteriert durch die Checkboxen und erstellt die PDFs
+     */
+    private function createFor(){
+        $max = $this->getMaxDozentID();
+        for ($i = 0; $i < ($max + 1); $i++ ){
+            if (isset($_POST['check'.$i])){
+                $this->setDozentID($this->getPOST('check'.$i));
+                $this->createSemesterabrPDF();
+            }
+        }
+        ob_end_clean();
+        $this->zipFolder();
+        $this->forceDownload('semesterabr.zip');
+        $this->deleteSemesterabr();
+    }
+
+    /**
+     * @function zipFolder
+     * Generiert eine .zip Datei aus dem Ordner semesterabr
+     */
+    private function zipFolder(){
+        $rootPath = realpath('semesterabr');
+
+        //Neues Archiv erstellen
+        $zip = new ZipArchive();
+        $zip->open('semesterabr.zip', ZipArchive::CREATE | ZipArchive::OVERWRITE );
+        //Dateien auswählen
+        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($rootPath), RecursiveIteratorIterator::LEAVES_ONLY);
+
+        foreach ($files as $name => $file)
+        {
+            // Skip directories (they would be added automatically)
+            if (!$file->isDir())
+            {
+                // Get real and relative path for current file
+                $filePath = $file->getRealPath();
+                $relativePath = substr($filePath, strlen($rootPath) + 1);
+
+                // Add current file to archive
+                $zip->addFile($filePath, $relativePath);
+            }
+        }
+        // Zip archive will be created only after closing object
+        $zip->close();
+    }
+
+    /**
+     * @function deleteSemesterabr
+     * Löscht alle generierten Semesterabrechnungen und das Archiv
+     */
+    private function deleteSemesterabr(){
+        $dir = 'semesterabr';
+        $files = glob($dir. '/*');
+        foreach ($files as $file){
+            if (is_file($file)){
+                unlink($file);
+            }
         }
 
-        //Drucken der Abrechnung
-        if (isset($_POST["print"])) {
-            $this->setDozentID($this->getPOST("DozentID"));
-            $this->createSemesterabrPDF();
-        }
+        unlink('semesterabr.zip');
     }
 
     /**
@@ -446,10 +503,11 @@ WHERE `DOZENT_ID_DOZENT` = :DozentID");
         $this->createCellPDFTableSumme($pdf);
         $this->createCellPDFTableBottom($pdf);
 
-        //Löschung des Ausgabepuffers für Herunterladen
-        ob_end_clean();
-        //Anzeigen im Browser
-        $pdf->Output('Semesterabrechnung.pdf', 'I');
+
+        //Speichern im Ordner semesterabr
+        //getDozent[0] = Nachname
+        $pdf_string = $pdf->Output('Semesterabrechnung_'.$this->dozentID.'.pdf', 'S');
+        file_put_contents('./semesterabr/Semesterabrechnung_'.$this->getDozent($this->dozentID)[0].'.pdf', $pdf_string);
     }
 
     /**

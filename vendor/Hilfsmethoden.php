@@ -543,6 +543,7 @@ WHERE `ARTEN_VON_ZUSATZAUFGABEN_ID_ART` = :ArtPraxisprojektID AND `DOZENT_ID_DOZ
      */
     public function getFE($dozentID)
     {
+        //SQL-Statement zum Laden der Forschung/Entwicklungsstunden
         $statement = $this->dbh->prepare('SELECT `FE` FROM `dozent` WHERE `ID_DOZENT` = :DozentID');
         $result = $statement->execute(array('DozentID' => $dozentID));
 
@@ -563,6 +564,7 @@ WHERE `ARTEN_VON_ZUSATZAUFGABEN_ID_ART` = :ArtPraxisprojektID AND `DOZENT_ID_DOZ
      */
     public function getSWSInAF($dozentID)
     {
+        //SQL-Statement zum Laden der SWS in anderen Fakultäten
         $statement = $this->dbh->prepare('SELECT `SWS_I_A_F` FROM `dozent` WHERE `ID_DOZENT` = :DozentID');
         $result = $statement->execute(array('DozentID' => $dozentID));
 
@@ -611,5 +613,23 @@ WHERE `ARTEN_VON_ZUSATZAUFGABEN_ID_ART` = :ArtPraxisprojektID AND `DOZENT_ID_DOZ
         else {
             die("Datei $filename existiert nicht");
         }
+    }
+
+    /**
+     * @function getMaxDozentID
+     * Liefert die höchste ID der Dozenten zurück
+     * @return mixed
+     * Höchste ID
+     */
+    public function getMaxDozentID(){
+        //SQL-Statement zum Laden der höchsten ID der Dozenten
+        $statement = $this->dbh->prepare('SELECT MAX(`ID_DOZENT`) FROM `dozent`');
+        $result = $statement->execute();
+
+        //fetched:
+        //[0]=ID
+        $data = $statement->fetch();
+
+        return $data[0];
     }
 }

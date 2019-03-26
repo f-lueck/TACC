@@ -17,10 +17,6 @@ $obj = new SemesterabrErstellen();
         <form method="post">
             <div class="buttonholder">
                 <?php
-                $obj->createDozentDropdown();
-                ?>
-
-                <?php
                 echo $obj->createDozentTable();
                 ?>
                 <div class="buttonholder">
