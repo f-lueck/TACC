@@ -13,10 +13,10 @@
 include ("Benutzersitzung.php");
 
 /**
- * Class ZusatzAnlegen
+ * Class ZusatzaZuweisen
  * Ermöglicht das Anlegen von Zusatzaufgaben für einen Dozenten
  */
-class ZusatzAnlegen extends Benutzersitzung
+class ZusatzaZuweisen extends Benutzersitzung
 {
     /**
      * @var
@@ -27,7 +27,7 @@ class ZusatzAnlegen extends Benutzersitzung
     private $message;
 
     /**
-     * ZusatzAnlegen constructor.
+     * ZusatzaZuweisen constructor.
      * Erzeugt das Objekt der Klasse und ermöglicht Methodenaufruf nach Buttonclick
      */
     public function __construct()

@@ -30,6 +30,8 @@
                     <li><a href="sonderazuweisen.php">Sonderaufgaben zuweisen</a></li>
                     <li><a href="dozentanlegen.php">Dozenten anlegen</a></li>
                     <li><a href="dozentbearbeiten.php">Dozenten bearbeiten</a></li>
+                    <li><a href="zusatzaanlegen.php">Zusatzaufgaben anlegen</a></li>
+                    <li><a href="zusatzabearbeiten.php">Zusatzaufgaben bearbeiten</a></li>
                 </ul>
             </li>
             <li><a href="semesterabrerstellen.php">Semesterabrechnung erstellen</a></li>

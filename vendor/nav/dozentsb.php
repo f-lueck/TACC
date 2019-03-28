@@ -13,12 +13,12 @@
         <ul>
             <li><a href="dozenthome.php">Home</a></li>
             <li><a href="lvzuweisen.php">Veranstaltung zuweisen</a></li>
-            <li><a href="allelv.php">Veranstaltungen einsehen</a> </li>
+            <li><a href="allelv.php">Veranstaltungen einsehen</a></li>
             <li><a href="meineauftraege.php">Meine Aufträge</a></li>
             <li><a class="dropdown-btn">Meine <br>Zusatzaufgaben<i class="fa fa-caret-down"></a></i>
                 <ul class="dropmenu">
                     <li><a href="meinezusatza.php">Meine Zusatzaufgaben</a></li>
-                    <li><a href="zusatzaanlegen.php">Zusatzaufgaben anlegen</a></li>
+                    <li><a href="zusatzazuweisen.php">Zusatzaufgaben anlegen</a></li>
                 </ul>
             </li>
             <li><a href="abrerstellen.php">Abrechnung</a></li>

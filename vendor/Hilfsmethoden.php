@@ -632,4 +632,22 @@ WHERE `ARTEN_VON_ZUSATZAUFGABEN_ID_ART` = :ArtPraxisprojektID AND `DOZENT_ID_DOZ
 
         return $data[0];
     }
+
+    /**
+     * @function getMaxZusatzaID
+     * Liefert die höchste ID der Zusatzaufgaben zurück
+     * @return mixed
+     * Höchste ID
+     */
+    public function getMaxZusatzaID(){
+        //SQL-Statement zum Laden der höchsten ID der Dozenten
+        $statement = $this->dbh->prepare('SELECT MAX(`ID_ART`) FROM `arten_von_zusatzaufgaben`');
+        $result = $statement->execute();
+
+        //fetched:
+        //[0]=ID
+        $data = $statement->fetch();
+
+        return $data[0];
+    }
 }
