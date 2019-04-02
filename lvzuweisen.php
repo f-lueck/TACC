@@ -32,74 +32,79 @@ $obj = new LvZuweisen();
     <div class="center">
         <h1>Lehrveranstaltung zuweisen</h1>
 
-        <div class="flex-container-tabelle">
+        <form class="flex-container-tabelle" method="post">
             <div>
-                <?php echo $obj->showLVInformatik() ?>
-            </div>
-            <div>
-                <?php echo $obj->showLVEigene() ?>
-            </div>
-            <div>
-                <table>
-                    <caption>IT Management</caption>
-                    <tr>
-                        <th>Name Lehrveranstaltung</th>
-                        <th>SWS (muss)</th>
-                        <th>Auswahl</th>
-                        <th>SWS gewünscht</th>
-                    </tr>
-                </table>
-                <button class="submitButtons" type="submit" name="submit" id="submit" value="Speichern">Speichern
-                </button>
-                <button class="submitButtons" type="reset">Reset</button>
+                    <table>
+                        <caption>Informatik</caption>
+                        <tr>
+                            <th>Name Lehrveranstaltung</th>
+                            <th>SWS</th>
+                            <th>Auswahl</th>
+                        </tr>
+                        <?php echo $obj->showLVInformatik(6) ?>
+                        <?php echo $obj->showLVInformatik(1) ?>
+                        <?php echo $obj->showLVInformatik(2) ?>
+                        <?php echo $obj->showLVInformatik(3) ?>
+                        <?php echo $obj->showLVInformatik(4) ?>
+                        <?php echo $obj->showLVInformatik(5) ?>
+                    </table>
             </div>
             <div>
                 <table>
                     <caption>Wirtschaftsinformatik</caption>
                     <tr>
                         <th>Name Lehrveranstaltung</th>
-                        <th>SWS (muss)</th>
+                        <th>SWS</th>
                         <th>Auswahl</th>
-                        <th>SWS gewünscht</th>
                     </tr>
+                    <?php echo $obj->showLVInformatik(11) ?>
+                    <?php echo $obj->showLVInformatik(12) ?>
                 </table>
-                <button class="submitButtons" type="submit" name="submit" id="submit" value="Speichern">Speichern
-                </button>
-                <button class="submitButtons" type="reset">Reset</button>
+            </div>
+            <div>
+                <table>
+                    <caption>Master</caption>
+                    <tr>
+                        <th>Name Lehrveranstaltung</th>
+                        <th>SWS</th>
+                        <th>Auswahl</th>
+                    </tr>
+                    <?php echo $obj->showLVInformatik(21) ?>
+                    <?php echo $obj->showLVInformatik(22) ?>
+                    <?php echo $obj->showLVInformatik(23) ?>
+                </table>
             </div>
             <div>
                 <table>
                     <caption>Master (alt)</caption>
                     <tr>
                         <th>Name Lehrveranstaltung</th>
-                        <th>SWS (muss)</th>
+                        <th>SWS</th>
                         <th>Auswahl</th>
-                        <th>SWS gewünscht</th>
                     </tr>
+                    <?php echo $obj->showLVInformatik(32) ?>
+                    <?php echo $obj->showLVInformatik(33) ?>
+                    <?php echo $obj->showLVInformatik(34) ?>
                 </table>
-                <button class="submitButtons" type="submit" name="submit" id="submit" value="Speichern">Speichern
-                </button>
-                <button class="submitButtons" type="reset">Reset</button>
             </div>
             <div>
                 <table>
-                    <caption>Master (neu)</caption>
+                    <caption>IT-Management</caption>
                     <tr>
                         <th>Name Lehrveranstaltung</th>
-                        <th>SWS (muss)</th>
+                        <th>SWS</th>
                         <th>Auswahl</th>
-                        <th>SWS gewünscht</th>
                     </tr>
+                    <?php echo $obj->showLVInformatik(31) ?>
                 </table>
                 <div class="buttonholder">
-                    <button class="submitButtons" type="submit" name="submit" id="submit" value="Speichern">Speichern
+                    <button class="submitButtons" type="submit" name="submitSelect" id="submitSelect" value="Speichern">Auswählen
                     </button>
-                    <button class="submitButtons" type="reset">Reset</button>
                 </div>
             </div>
-
-        </div>
+        </form>
     </div>
+</div>
 </div>
 </body>
 </html>
