@@ -43,6 +43,10 @@ class lvZuweisen extends Benutzersitzung
         if (isset($_POST["submitSelect"])) {
             echo $this->selectedLVDetails();
         }
+
+        if (isset($_POST["submitSave"])) {
+            $this->createLinkInDB();
+        }
     }
 
     private function selectedLVDetails() {
@@ -84,7 +88,7 @@ class lvZuweisen extends Benutzersitzung
                 $html .= '<td>'.$data[2].'</td>';
                 $html .= '<td><input type="number" name="sws'.$lvID.'" id="sws'.$lvID.'"></td>';
                 $html .= '<td><input type="text" name="pForm'.$lvID.'" id="pForm'.$lvID.'"></td>';
-                $html .= '<td><input type="checkbox" name="confirmed'.$lvID.'" id="confirmed'.$lvID.'" checked="checked"></td>';
+                $html .= '<td><input type="checkbox" name="confirmed'.$lvID.'" id="confirmed'.$lvID.'" value="'.$lvID.'" checked="checked"></td>';
                 $html .= '</tr>';
             }
         }
@@ -113,16 +117,20 @@ class lvZuweisen extends Benutzersitzung
         $dozentID = $this->getSession('IdDozent');
         $this->semester = $this->getCurrentSemester();
         $anz = $this->getMaxAnzLV();
+        $wirklicheSWS = 0;
+        $veraenderung = 0;
 
         for ($i = 1; $i < $anz + 1; $i++) {
-            if (isset($_POST['check' . $i])) {
-                $lvID = $this->getPOST('check' . $i);
-                $sws = $this->getPOST('sws' . $i);
+            if (isset($_POST['confirmed' . $i])) {
+                $lvID = $this->getPOST('confirmed' . $i);
+                $gebuchteSWS = $this->getPOST('sws' . $i);
+                $pForm = $this->getPOST('pForm'.$i);
 
                 //SQL-Statement zu Erstellung der Verbindung LV-Dozent
                 $statement = $this->dbh->prepare('INSERT INTO `dozent_hat_veranstaltung_in_s`(`DOZENT_ID_DOZENT`, 
-`VERANSTALTUNG_ID_VERANSTALTUNG`, `SEMESTER_ID_SEMESTER`, `ANTEIL_PROZENT`, `WIRKLICHE_SWS`) VALUES (:DozentID,:LvID,:Semester,:Prozent,:SWS)');
-                $result = $statement->execute(array("DozentID" => $dozentID, "LvID" => $lvID, "Semester" => $this->semester, "Prozent" => $this->prozent, "SWS" => $sws));
+                `VERANSTALTUNG_ID_VERANSTALTUNG`, `SEMESTER_ID_SEMESTER`, `ANTEIL_PROZENT`, `WIRKLICHE_SWS`, `GEBUCHTE_SWS`, `VERAENDERUNG`, `P_FORM`) 
+                VALUES (:DozentID, :LvID ,:SemesterID , :Prozent, :WirklicheSWS, :GebuchteSWS, :Veraenderung, :PForm)');
+                $result = $statement->execute(array("DozentID" => $dozentID, "LvID" => $lvID, "SemesterID" => $this->semester, "Prozent" => $this->prozent, "WirklicheSWS" => $wirklicheSWS,"GebuchteSWS" => $gebuchteSWS, "Veraenderung" => $veraenderung, "PForm" => $pForm));
 
                 if ($result) {
                     //Verbindung erstellt

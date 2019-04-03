@@ -175,7 +175,7 @@ WHERE `DOZENT_ID_DOZENT` = :DozentID');
             $dozentID = $data_outer[0];
 
             //SQL-Statement um den Namen und die SWS der Veranstaltungen des Dozenten zu laden
-            $statement_inner = $this->dbh->prepare('SELECT veranstaltung.BEZEICHNUNG, dozent_hat_veranstaltung_in_s.WIRKLICHE_SWS 
+            $statement_inner = $this->dbh->prepare('SELECT veranstaltung.BEZEICHNUNG, dozent_hat_veranstaltung_in_s.GEBUCHTE_SWS, `P_FORM` 
 FROM `dozent_hat_veranstaltung_in_s` INNER JOIN veranstaltung 
 ON dozent_hat_veranstaltung_in_s.VERANSTALTUNG_ID_VERANSTALTUNG = veranstaltung.ID_VERANSTALTUNG 
 WHERE `DOZENT_ID_DOZENT` = :DozentID');
@@ -184,6 +184,7 @@ WHERE `DOZENT_ID_DOZENT` = :DozentID');
             //fetched:
             //[0]=Name der Veranstaltung
             //[1]=Wirkliche SWS
+            //[2]=PForm
 
             $counter = 0;
 
@@ -200,7 +201,7 @@ WHERE `DOZENT_ID_DOZENT` = :DozentID');
                 $output .= '<td></td>';
                 $output .= '<td></td>';
                 $output .= '<td></td>';
-                $output .= '<td></td>';
+                $output .= '<td>'.$data_inner[2].'</td>';
                 $output .= '</tr>';
 
                 $counter++;
