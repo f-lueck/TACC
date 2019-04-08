@@ -16,6 +16,9 @@ $obj = new AbrErstellen();
 <div class="main">
     <div class="center">
         <h1>Übersicht</h1><br>
+        <?php
+        echo $obj ->disclaimer();
+        ?>
         <p>Bitten überprüfen Sie folgenden Angaben:</p><br>
 
         <p>Ostfalia Hochschule für angewandte Wissenschaften<br> <span
@@ -75,11 +78,9 @@ $obj = new AbrErstellen();
             <textarea id="text" name="text" rows="10" cols="30" maxlength="320"></textarea>
             <br><br>
             <br><br>
-            <div class="buttonholder">
-                <button class="submitButtons" type="submit" name="submit" id="submit" value="Speichern und Drucken">
-                    Speichern und Drucken
-                </button>
-            </div>
+            <?php
+            echo $obj->createSaveButton();
+            ?>
         </form>
     </div>
 </div>

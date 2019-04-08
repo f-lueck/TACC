@@ -416,8 +416,8 @@ WHERE `DOZENT_ID_DOZENT` = :DozentID');
      */
     public function getCurrentSemester()
     {
-        //SQL-Statement zum Laden der höchsten SemesterID
-        $statement = $this->dbh->prepare("SELECT MAX(ID_SEMESTER) FROM `semester`");
+        //SQL-Statement zum Laden der aktuellen SemesterID
+        $statement = $this->dbh->prepare("SELECT `ID_SEMESTER` FROM `semester` WHERE `AKTIV` = 1");
         $result = $statement->execute();
 
         //fetched:
@@ -648,6 +648,23 @@ WHERE `ARTEN_VON_ZUSATZAUFGABEN_ID_ART` = :ArtPraxisprojektID AND `DOZENT_ID_DOZ
         //[0]=ID
         $data = $statement->fetch();
 
+        return $data[0];
+    }
+
+    public function getMaxSemesterID(){
+        $statement = $this->dbh->prepare('SELECT MAX(`ID_SEMESTER`) FROM `semester`');
+        $result = $statement->execute();
+
+        $data = $statement->fetch();
+
+        return $data[0];
+    }
+
+    public function checkSemesterBlocked() {
+        $semesterID = $this->getCurrentSemester();
+        $statement = $this->dbh->prepare('SELECT `SPERRUNG` FROM `semester` WHERE `ID_SEMESTER` = :SemesterID');
+        $result = $statement->execute(array("SemesterID" => $semesterID));
+        $data = $statement->fetch();
         return $data[0];
     }
 }

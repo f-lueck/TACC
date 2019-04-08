@@ -25,6 +25,7 @@ class lvZuweisen extends Benutzersitzung
     private $message;
     private $semester;
     private $prozent = 1.0;
+    private $semesterBlocked;
 
     /**
      * lvZuweisen constructor.
@@ -38,6 +39,8 @@ class lvZuweisen extends Benutzersitzung
         $this->preventOpen();
         //Laden der Navbar
         $this->loadNav();
+
+        $this->semesterBlocked = $this->checkSemesterBlocked();
 
         //Nach Clicken des Buttons
         if (isset($_POST["submitSelect"])) {
@@ -248,5 +251,21 @@ WHERE `VERANSTALTUNG_ID_VERANSTALTUNG` = :LvID AND `SEMESTER_ID_SEMESTER` = :Sem
             return 0;
         }
         return $data[0];
+    }
+
+    public function createSaveButton() {
+        $html = '';
+        if (!$this->semesterBlocked) {
+            $html .= '<div class="buttonholder">';
+            $html .= '<button class="submitButtons" type="submit" name="submitSelect" id="submitSelect" value="Speichern">Auswählen</button>';
+            $html .= '</div>';
+        }
+        return $html;
+    }
+
+    public function disclaimer(){
+        if ($this->semesterBlocked){
+            return '<span>Die Zuweisung für dieses Semester wurde deaktiviert</span>';
+        }
     }
 }

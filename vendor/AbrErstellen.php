@@ -25,6 +25,7 @@ class AbrErstellen extends Benutzersitzung
      */
     private $dozentID = 0;
     private $counter = 0;
+    private $semesterBlocked;
 
     /**
      * AbrErstellen constructor.
@@ -38,6 +39,8 @@ class AbrErstellen extends Benutzersitzung
         $this->preventOpen();
         //Laden der Navbar
         $this->loadNav();
+
+        $this->semesterBlocked = $this->checkSemesterBlocked();
 
         //Erstellung der PDF auf Tastendruck
         $this->setDozentID();
@@ -589,5 +592,21 @@ WHERE `DOZENT_ID_DOZENT`= :DozentID");
     public function addCounter($i)
     {
         $this->counter += $i;
+    }
+
+    public function disclaimer(){
+        if ($this->semesterBlocked){
+            return '<span>Die Bearbeitung für dieses Semester wurde deaktiviert</span>';
+        }
+    }
+
+    public function createSaveButton() {
+        $html = '';
+        if (!$this->semesterBlocked) {
+            $html .= '<div class="buttonholder">';
+            $html .= '<button class="submitButtons" type="submit" name="submit" id="submit" value="Speichern und Drucken">Auswählen</button>';
+            $html .= '</div>';
+        }
+        return $html;
     }
 }

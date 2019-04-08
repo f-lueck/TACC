@@ -31,6 +31,9 @@ $obj = new LvZuweisen();
 <div class="main">
     <div class="center">
         <h1>Lehrveranstaltung zuweisen</h1>
+        <?php
+        echo $obj->disclaimer();
+        ?>
 
         <form class="flex-container-tabelle" method="post">
             <div>
@@ -97,10 +100,9 @@ $obj = new LvZuweisen();
                     </tr>
                     <?php echo $obj->showLVInformatik(31) ?>
                 </table>
-                <div class="buttonholder">
-                    <button class="submitButtons" type="submit" name="submitSelect" id="submitSelect" value="Speichern">Auswählen
-                    </button>
-                </div>
+                <?php
+                echo $obj->createSaveButton();
+                ?>
             </div>
         </form>
     </div>
